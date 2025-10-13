@@ -1,26 +1,26 @@
 # Constrained Device Application (Connected Devices)
 
-## Lab Module 05
+## Lab Module 06
 
-Be sure to implement all the PIOT-CDA-* issues (requirements) listed at [PIOT-INF-05-001 - Lab Module 05](https://github.com/orgs/programming-the-iot/projects/1#column-10488421).
+Be sure to implement all the PIOT-CDA-* issues (requirements) listed at [PIOT-INF-06-001 - Lab Module 06](https://github.com/orgs/programming-the-iot/projects/1#column-10488434).
 
 ### Description
 
 NOTE: Include two full paragraphs describing your implementation approach by answering the questions listed below.
 
 What does your implementation do? 
-Lab 5 GDA implementation collects sensor and system data from the CDA, processes and displays it, and sends actuator commands back to control devices, enabling full data 
-integration between the gateway and constrained device.
+Lab Module 06 implementation enables the Constrained Device Application (CDA) to exchange telemetry and control data with the Gateway Device Application (GDA) using MQTT. 
+It connects to a local MQTT broker, publishes system performance metrics, and receives actuator command messages for processing.
 
 How does your implementation work?
-It uses messaging protocols like MQTT through the MqttClientConnector and DataMessageListener to receive, decode, and process incoming data. The DataManager handles these messages, 
-updates system status, and sends actuator responses back to the CDA for execution.
+The system uses DeviceDataManager to coordinate data flow between the SystemPerformanceManager, ActuatorAdapterManager, and MqttClientConnector. 
+The CDA periodically collects CPU, memory, and disk usage data and sends it through MQTT topics, while also handling incoming actuator commands. Configuration values are dynamically loaded from PiotConfig.props, and logging ensures proper tracking of connections, data exchange, and shutdown events.
 
 ### Code Repository and Branch
 
 NOTE: Be sure to include the branch (e.g. https://github.com/programming-the-iot/python-components/tree/alpha001).
 
-URL: https://github.com/Mensah-er/cda-python-components/tree/labmodule05
+URL: 
 
 ### UML Design Diagram(s)
 
@@ -34,23 +34,20 @@ book [Programming the IoT](https://learning.oreilly.com/library/view/programming
 NOTE: TA's will execute your unit tests. You only need to list each test case below
 (e.g. ConfigUtilTest, DataUtilTest, etc). Be sure to include all previous tests, too,
 since you need to ensure you haven't introduced regressions.
--test_DataUtil.py
+
 - 
 - 
 - 
 
 ### Integration Tests Executed
--test_SystemPerformanceManager.py
--test_DataIntegrationTest.py
--
--
+
 NOTE: TA's will execute most of your integration tests using their own environment, with
 some exceptions (such as your cloud connectivity tests). In such cases, they'll review
 your code to ensure it's correct. As for the tests you execute, you only need to list each
 test case below (e.g. SensorSimAdapterManagerTest, DeviceDataManagerTest, etc.)
 
-- 
-- 
+- ConstrainedDeviceAppTest
+- MqttClientConnectorTest
 - 
 
 EOF.
