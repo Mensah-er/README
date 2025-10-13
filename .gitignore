@@ -1,7 +1,0 @@
-**/*.pyc
-**/cert
-**/cred
-**/venv
-**/wsl-venv
-**/piot-venv
-.venv
