@@ -20,7 +20,7 @@ receives and logs responses, unsubscribes, and then disconnects—validating eac
 
 NOTE: Be sure to include the branch (e.g. https://github.com/programming-the-iot/python-components/tree/alpha001).
 
-URL: 
+URL: https://github.com/Mensah-er/gda-java-components/tree/labmodule07
 
 ### UML Design Diagram(s)
 
@@ -46,8 +46,8 @@ some exceptions (such as your cloud connectivity tests). In such cases, they'll 
 your code to ensure it's correct. As for the tests you execute, you only need to list each
 test case below (e.g. SensorSimAdapterManagerTest, DeviceDataManagerTest, etc.)
 
-- 
-- 
+- java -jar target/gateway-device-app-0.0.1-jar-with-dependencies.jar
+- MqttClientConnectorTest
 - 
 
 EOF.
