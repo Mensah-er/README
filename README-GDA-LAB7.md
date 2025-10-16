@@ -1,26 +1,26 @@
 # Gateway Device Application (Connected Devices)
 
-## Lab Module 05
+## Lab Module 07
 
-Be sure to implement all the PIOT-GDA-* issues (requirements) listed at [PIOT-INF-05-001 - Lab Module 05](https://github.com/orgs/programming-the-iot/projects/1#column-10488421).
+Be sure to implement all the PIOT-GDA-* issues (requirements) listed at [PIOT-INF-07-001 - Lab Module 07](https://github.com/orgs/programming-the-iot/projects/1#column-10488499).
 
 ### Description
 
 NOTE: Include two full paragraphs describing your implementation approach by answering the questions listed below.
 
 What does your implementation do? 
-Lab 5 GDA implementation receives sensor and system data from the CDA, processes it, displays the results, and 
-sends actuator commands back to the CDA, completing two-way IoT communication.
+It tests the MQTT client’s ability to connect, publish, subscribe, and disconnect correctly 
+using different QoS levels to verify all MQTT control packets.
 
 How does your implementation work?
-It uses the DataMessageListener and MqttClientConnector to exchange data between the CDA and GDA. Incoming messages 
-are parsed into SensorData or ActuatorData objects, processed by the DataManager, and responses are published back to the CDA for action.
+It connects to the MQTT broker, subscribes to topics, publishes messages at QoS 1 and 2, 
+receives and logs responses, unsubscribes, and then disconnects—validating each step’s success.
 
 ### Code Repository and Branch
 
 NOTE: Be sure to include the branch (e.g. https://github.com/programming-the-iot/python-components/tree/alpha001).
 
-URL: https://github.com/Mensah-er/gda-java-components/tree/labmodule05
+URL: 
 
 ### UML Design Diagram(s)
 
@@ -34,18 +34,13 @@ book [Programming the IoT](https://learning.oreilly.com/library/view/programming
 NOTE: TA's will execute your unit tests. You only need to list each test case below
 (e.g. ConfigUtilTest, DataUtilTest, etc). Be sure to include all previous tests, too,
 since you need to ensure you haven't introduced regressions.
--ActuatorDataTest
--SensorDataTest
--SystemPerformanceDataTest
--DataUtilTest.java
--DataIntegrationTest 
+
+- 
+- 
 - 
 
 ### Integration Tests Executed
--SystemPerformanceManagerTest
--DeviceDataManagerNoCommsTest
--GatewayDeviceAppTest
--
+
 NOTE: TA's will execute most of your integration tests using their own environment, with
 some exceptions (such as your cloud connectivity tests). In such cases, they'll review
 your code to ensure it's correct. As for the tests you execute, you only need to list each
