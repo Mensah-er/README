@@ -1,21 +1,9 @@
-/**
- * This class is part of the Programming the Internet of Things
- * project, and is available via the MIT License, which can be
- * found in the LICENSE file at the top level of this repository.
- * 
- * You may find it more helpful to your design to adjust the
- * functionality, constants and interfaces (if there are any)
- * provided within in order to meet the needs of your specific
- * Programming the Internet of Things project.
- */
-
 package programmingtheiot.gda.connection;
 
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.UUID;
 
-import org.eclipse.paho.mqttv5.client.IMqttDeliveryToken;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttCallback;
 import org.eclipse.paho.mqttv5.client.MqttClient;
@@ -24,162 +12,180 @@ import org.eclipse.paho.mqttv5.client.MqttDisconnectResponse;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
-import org.eclipse.paho.mqttv5.common.MqttPersistenceException;
-import org.eclipse.paho.mqttv5.common.MqttSecurityException;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 
 import programmingtheiot.common.ConfigConst;
-import programmingtheiot.common.ConfigUtil;
 import programmingtheiot.common.IDataMessageListener;
 import programmingtheiot.common.ResourceNameEnum;
 
-/**
- * Shell representation of class for student implementation.
- * 
- */
-public class Mqttv5ClientConnector implements IPubSubClient, MqttCallback
-{
-	// static
-	
-	private static final Logger _Logger =
-		Logger.getLogger(Mqttv5ClientConnector.class.getName());
-	
-	// params
-	
-	
-	// constructors
-	
-	/**
-	 * Default.
-	 * 
-	 */
-	public Mqttv5ClientConnector()
-	{
-		super();
-	}
-	
-	
-	// public methods
-	
-	@Override
-	public boolean connectClient()
-	{
-		return false;
-	}
+public class Mqttv5ClientConnector implements IPubSubClient, MqttCallback {
 
-	@Override
-	public boolean disconnectClient()
-	{
-		return false;
-	}
+    private static final Logger _Logger = Logger.getLogger(Mqttv5ClientConnector.class.getName());
 
-	public boolean isConnected()
-	{
-		return false;
-	}
-	
-	@Override
-	public boolean publishMessage(ResourceNameEnum topicName, String msg, int qos)
-	{
-		return false;
-	}
+    private String brokerAddr = "tcp://localhost:1883";
+    private String clientId = "GDAClient-" + UUID.randomUUID().toString();
 
-	@Override
-	public boolean subscribeToTopic(ResourceNameEnum topicName, int qos)
-	{
-		return false;
-	}
+    private MqttClient mqttClient;
+    private MqttConnectionOptions connOpts;
 
-	@Override
-	public boolean unsubscribeFromTopic(ResourceNameEnum topicName)
-	{
-		return false;
-	}
+    private IDataMessageListener dataMsgListener;
+    private IConnectionListener connListener;
 
-	@Override
-	public boolean setConnectionListener(IConnectionListener listener)
-	{
-		return false;
-	}
-	
-	@Override
-	public boolean setDataMessageListener(IDataMessageListener listener)
-	{
-		return false;
-	}
-	
-	// callbacks
-	
-	@Override
-	public void authPacketArrived(int reasonCode, MqttProperties properties)
-	{
-		// TODO: implement this callback
-	}
+    private static final int DEFAULT_QOS = ConfigConst.DEFAULT_QOS;
 
-	@Override
-	public void connectComplete(boolean reconnect, String serverURI)
-	{
-		// TODO: implement this callback
-	}
+    public Mqttv5ClientConnector() {
+        try {
+            this.connOpts = new MqttConnectionOptions();
+            this.connOpts.setCleanStart(true);
+            this.connOpts.setAutomaticReconnect(true);
 
-	@Override
-	public void deliveryComplete(IMqttToken token)
-	{
-		// TODO: implement this callback
-	}
+            this.mqttClient = new MqttClient(this.brokerAddr, this.clientId, new MemoryPersistence());
+            this.mqttClient.setCallback(this);
 
-	@Override
-	public void disconnected(MqttDisconnectResponse disconnectResponse)
-	{
-		// TODO: implement this callback
-	}
+            _Logger.info("Mqttv5ClientConnector initialized for broker: " + this.brokerAddr);
 
-	@Override
-	public void mqttErrorOccurred(MqttException exception)
-	{
-		// TODO: implement this callback
-	}
+        } catch (MqttException e) {
+            _Logger.log(Level.SEVERE, "Failed to initialize MQTT v5 client.", e);
+        }
+    }
 
-	@Override
-	public void messageArrived(String topic, MqttMessage msg) throws Exception
-	{
-		// TODO: implement this callback
-	}
+    @Override
+    public boolean connectClient() {
+        try {
+            if (!mqttClient.isConnected()) {
+                mqttClient.connect(connOpts);
+                _Logger.info("Connected to MQTT v5 broker: " + brokerAddr);
+            }
+            return true;
+        } catch (MqttException e) {
+            _Logger.log(Level.SEVERE, "MQTT v5 connection failed.", e);
+            return false;
+        }
+    }
 
-	
-	// private methods
-	
-	/**
-	 * Called by the constructor to set the MQTT client parameters to be used for the connection.
-	 * 
-	 * @param configSectionName The name of the configuration section to use for
-	 * the MQTT client configuration parameters.
-	 */
-	private void initClientParameters(String configSectionName)
-	{
-		// TODO: implement this
-	}
-	
-	/**
-	 * Called by {@link #initClientParameters(String)} to load credentials.
-	 * 
-	 * @param configSectionName The name of the configuration section to use for
-	 * the MQTT client configuration parameters.
-	 */
-	private void initCredentialConnectionParameters(String configSectionName)
-	{
-		// TODO: implement this
-	}
-	
-	/**
-	 * Called by {@link #initClientParameters(String)} to enable encryption.
-	 * 
-	 * @param configSectionName The name of the configuration section to use for
-	 * the MQTT client configuration parameters.
-	 */
-	private void initSecureConnectionParameters(String configSectionName)
-	{
-		// TODO: implement this
-	}
+    @Override
+    public boolean disconnectClient() {
+        try {
+            if (mqttClient.isConnected()) {
+                mqttClient.disconnect();
+                _Logger.info("Disconnected from MQTT v5 broker: " + brokerAddr);
+            }
+            return true;
+        } catch (MqttException e) {
+            _Logger.log(Level.SEVERE, "MQTT v5 disconnect failed.", e);
+            return false;
+        }
+    }
 
+    public boolean isConnected() {
+        return mqttClient != null && mqttClient.isConnected();
+    }
+
+    @Override
+    public boolean publishMessage(ResourceNameEnum topicName, String msg, int qos) {
+        if (topicName == null || msg == null || msg.isEmpty()) return false;
+        if (qos < 0 || qos > 2) qos = DEFAULT_QOS;
+
+        try {
+            MqttMessage mqttMsg = new MqttMessage(msg.getBytes());
+            mqttMsg.setQos(qos);
+            mqttClient.publish(topicName.getResourceName(), mqttMsg);
+            return true;
+        } catch (MqttException e) {
+            _Logger.log(Level.SEVERE, "Failed to publish message: " + topicName, e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean subscribeToTopic(ResourceNameEnum topicName, int qos) {
+        if (topicName == null) return false;
+        if (qos < 0 || qos > 2) qos = DEFAULT_QOS;
+
+        try {
+            mqttClient.subscribe(topicName.getResourceName(), qos);
+            return true;
+        } catch (MqttException e) {
+            _Logger.log(Level.SEVERE, "Failed to subscribe to topic: " + topicName, e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean unsubscribeFromTopic(ResourceNameEnum topicName) {
+        if (topicName == null) return false;
+
+        try {
+            mqttClient.unsubscribe(topicName.getResourceName());
+            return true;
+        } catch (MqttException e) {
+            _Logger.log(Level.SEVERE, "Failed to unsubscribe from topic: " + topicName, e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean setDataMessageListener(IDataMessageListener listener) {
+        if (listener != null) {
+            this.dataMsgListener = listener;
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean setConnectionListener(IConnectionListener listener) {
+        if (listener != null) {
+            this.connListener = listener;
+            return true;
+        }
+        return false;
+    }
+
+    // ====================
+    // MQTT v5 Callbacks
+    // ====================
+
+    @Override
+    public void connectComplete(boolean reconnect, String serverURI) {
+        _Logger.info("MQTT v5 connection complete. Reconnect? " + reconnect + ". Broker: " + serverURI);
+    }
+
+    @Override
+    public void disconnected(MqttDisconnectResponse disconnectResponse) {
+        _Logger.warning("MQTT v5 disconnected. Reason: " + disconnectResponse.getReasonString());
+    }
+
+    @Override
+    public void authPacketArrived(int reasonCode, MqttProperties properties) {
+        _Logger.info("Auth packet arrived. Reason code: " + reasonCode);
+    }
+
+    @Override
+    public void deliveryComplete(IMqttToken token) {
+        _Logger.fine("Delivered MQTT v5 message with ID: " + token.getMessageId());
+    }
+
+    @Override
+    public void messageArrived(String topic, MqttMessage msg) {
+        _Logger.info("Message arrived: " + topic + " -> " + new String(msg.getPayload()));
+
+        if (dataMsgListener != null) {
+            ResourceNameEnum resource = null;
+            try {
+                resource = ResourceNameEnum.valueOf(topic); // Convert string to enum
+            } catch (IllegalArgumentException e) {
+                _Logger.warning("Unknown topic: " + topic);
+            }
+
+            if (resource != null) {
+                dataMsgListener.handleIncomingMessage(resource, new String(msg.getPayload()));
+            }
+        }
+    }
+
+    @Override
+    public void mqttErrorOccurred(MqttException exception) {
+        _Logger.log(Level.SEVERE, "MQTT v5 error occurred.", exception);
+    }
 }

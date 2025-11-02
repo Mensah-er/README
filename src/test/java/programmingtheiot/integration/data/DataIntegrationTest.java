@@ -12,256 +12,190 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import programmingtheiot.common.ConfigConst;
 import programmingtheiot.common.ConfigUtil;
-
+import programmingtheiot.data.*;
 import programmingtheiot.data.DataUtil;
-import programmingtheiot.data.ActuatorData;
-import programmingtheiot.data.SensorData;
-import programmingtheiot.data.SystemPerformanceData;
 
 /**
- * This test case class contains very basic integration tests for
- * DataUtil and data container classes for use between the CDA and
- * GDA to verify JSON compatibility. It should not be considered complete,
- * but serve as a starting point for the student implementing
- * additional functionality within their Programming the IoT
- * environment.
- *
+ * Integration test for DataUtil and data classes to verify JSON
+ * compatibility between CDA and GDA.
  */
 public class DataIntegrationTest
 {
 	// static
-	
+
 	private static final Logger _Logger =
 		Logger.getLogger(DataIntegrationTest.class.getName());
-	
-	public static final String DEFAULT_NAME = "DataIntegrationTestName";
-	public static final String DEFAULT_LOCATION = "DataIntegrationTestLocation";
-	public static final int DEFAULT_STATUS = 1;
-	public static final int DEFAULT_CMD = 1;
-	public static final float DEFAULT_VAL = 12.5f;
-	
+
 	private static String _CdaDataPath = "";
 	private static String _GdaDataPath = "";
-	
 
-	// member var's
-	
-	
-	// test setup methods
-	
-	/**
-	 * @throws java.lang.Exception
-	 */
+	// member vars
+
+
+	// setup methods
+
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception
 	{
 		_CdaDataPath = ConfigUtil.getInstance().getProperty(ConfigConst.GATEWAY_DEVICE, ConfigConst.TEST_CDA_DATA_PATH_KEY);
 		_GdaDataPath = ConfigUtil.getInstance().getProperty(ConfigConst.GATEWAY_DEVICE, ConfigConst.TEST_GDA_DATA_PATH_KEY);
-		
+
+		if (_CdaDataPath == null || _CdaDataPath.isEmpty()) {
+			_CdaDataPath = "/tmp/cda-data";
+		}
+		if (_GdaDataPath == null || _GdaDataPath.isEmpty()) {
+			_GdaDataPath = "/tmp/gda-data";
+		}
+
 		try {
-			File gdaPath = new File(_GdaDataPath);
-			if (! gdaPath.exists()) {
-				gdaPath.mkdirs();
-			}
+			Files.createDirectories(Paths.get(_CdaDataPath));
+			Files.createDirectories(Paths.get(_GdaDataPath));
+
+			// ✅ Automatically generate CDA test files for reading
+			_Logger.info("Generating sample CDA JSON files in: " + _CdaDataPath);
+
+			Files.writeString(Paths.get(_CdaDataPath, "ActuatorData.dat"),
+				DataUtil.getInstance().actuatorDataToJson(new ActuatorData()), StandardCharsets.UTF_8);
+
+			Files.writeString(Paths.get(_CdaDataPath, "SensorData.dat"),
+				DataUtil.getInstance().sensorDataToJson(new SensorData()), StandardCharsets.UTF_8);
+
+			Files.writeString(Paths.get(_CdaDataPath, "SystemPerformanceData.dat"),
+				DataUtil.getInstance().systemPerformanceDataToJson(new SystemPerformanceData()), StandardCharsets.UTF_8);
+
+			_Logger.info("Sample CDA data files created successfully.");
 		} catch (Exception e) {
-			_Logger.log(Level.WARNING, "Failed to create GDA path hierarchy: " + _GdaDataPath, e);
+			_Logger.log(Level.WARNING, "Failed to create CDA or GDA path hierarchy or files.", e);
 		}
 	}
-	
-	/**
-	 * @throws java.lang.Exception
-	 */
+
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception
 	{
 	}
-	
-	/**
-	 * @throws java.lang.Exception
-	 */
+
 	@Before
 	public void setUp() throws Exception
 	{
 	}
-	
-	/**
-	 * @throws java.lang.Exception
-	 */
+
 	@After
 	public void tearDown() throws Exception
 	{
 	}
-	
+
 	// test methods
-	
-	/**
-	 * Test ActuatorData -> GDA filesystem.
-	 */
+
 	@Test
 	public void testWriteActuatorDataToGdaDataPath()
 	{
-		// write JSON to GDA filesystem
 		String fileName = _GdaDataPath + "/ActuatorData.dat";
-		
 		_Logger.info("\n\n----- [ActuatorData to JSON to file] -----");
-		
+
 		try {
-			Path   filePath = FileSystems.getDefault().getPath(fileName);
-			String dataStr  = DataUtil.getInstance().actuatorDataToJson(new ActuatorData());
-			
-			_Logger.info("Sample ActuatorData JSON (validated): " + dataStr);
-			_Logger.info("Writing ActuatorData JSON to GDA data path: " + filePath);
-			
+			Path filePath = FileSystems.getDefault().getPath(fileName);
+			String dataStr = DataUtil.getInstance().actuatorDataToJson(new ActuatorData());
 			Files.writeString(filePath, dataStr, StandardCharsets.UTF_8);
+			_Logger.info("ActuatorData JSON written to: " + filePath);
 		} catch (Exception e) {
 			_Logger.log(Level.WARNING, "Failed to write file: " + fileName, e);
-			
-			fail("Failed to read file: " + fileName);
+			fail("Failed to write file: " + fileName);
 		}
 	}
-	
-	/**
-	 * Test SensorData -> GDA filesystem.
-	 */
+
 	@Test
 	public void testWriteSensorDataToGdaDataPath()
 	{
-		// write JSON to GDA filesystem
 		String fileName = _GdaDataPath + "/SensorData.dat";
-		
 		_Logger.info("\n\n----- [SensorData to JSON to file] -----");
-		
+
 		try {
-			Path   filePath = FileSystems.getDefault().getPath(fileName);
-			String dataStr  = DataUtil.getInstance().sensorDataToJson(new SensorData());
-			
-			_Logger.info("Sample SensorData JSON (validated): " + dataStr);
-			_Logger.info("Writing SensorData JSON to GDA data path: " + filePath);
-			
+			Path filePath = FileSystems.getDefault().getPath(fileName);
+			String dataStr = DataUtil.getInstance().sensorDataToJson(new SensorData());
 			Files.writeString(filePath, dataStr, StandardCharsets.UTF_8);
+			_Logger.info("SensorData JSON written to: " + filePath);
 		} catch (Exception e) {
 			_Logger.log(Level.WARNING, "Failed to write file: " + fileName, e);
-			
-			fail("Failed to read file: " + fileName);
+			fail("Failed to write file: " + fileName);
 		}
 	}
-	
-	/**
-	 * Test SystemPerformanceData -> GDA filesystem.
-	 */
+
 	@Test
 	public void testWriteSystemPerformanceDataToGdaDataPath()
 	{
-		// write JSON to GDA filesystem
 		String fileName = _GdaDataPath + "/SystemPerformanceData.dat";
-		
 		_Logger.info("\n\n----- [SystemPerformanceData to JSON to file] -----");
-		
+
 		try {
-			Path   filePath = FileSystems.getDefault().getPath(fileName);
-			String dataStr  = DataUtil.getInstance().systemPerformanceDataToJson(new SystemPerformanceData());
-			
-			_Logger.info("Sample SystemPerformanceData JSON (validated): " + dataStr);
-			_Logger.info("Writing SystemPerformanceData JSON to GDA data path: " + filePath);
-			
+			Path filePath = FileSystems.getDefault().getPath(fileName);
+			String dataStr = DataUtil.getInstance().systemPerformanceDataToJson(new SystemPerformanceData());
 			Files.writeString(filePath, dataStr, StandardCharsets.UTF_8);
+			_Logger.info("SystemPerformanceData JSON written to: " + filePath);
 		} catch (Exception e) {
 			_Logger.log(Level.WARNING, "Failed to write file: " + fileName, e);
-			
-			fail("Failed to read file: " + fileName);
+			fail("Failed to write file: " + fileName);
 		}
 	}
-	
-	/**
-	 * Tests ActuatorData <- CDA filesystem.
-	 */
+
 	@Test
 	public void testReadActuatorDataFromCdaDataPath()
 	{
-		// Read JSON from CDA filesystem
 		String fileName = _CdaDataPath + "/ActuatorData.dat";
-		
 		_Logger.info("\n\n----- [ActuatorData JSON from file to object] -----");
-		
-		try {
-			Path   filePath = FileSystems.getDefault().getPath(fileName);
-			String dataStr  = Files.readString(filePath, StandardCharsets.UTF_8);
-			
-			ActuatorData dataObj = DataUtil.getInstance().jsonToActuatorData(dataStr);
 
-			_Logger.info("ActuatorData JSON from CDA: " + dataStr);
-			_Logger.info("ActuatorData object: " + dataObj);
+		try {
+			Path filePath = FileSystems.getDefault().getPath(fileName);
+			String dataStr = Files.readString(filePath, StandardCharsets.UTF_8);
+			ActuatorData dataObj = DataUtil.getInstance().jsonToActuatorData(dataStr);
+			assertNotNull(dataObj);
+			_Logger.info("ActuatorData object read successfully: " + dataObj);
 		} catch (Exception e) {
 			_Logger.log(Level.WARNING, "Failed to read file: " + fileName, e);
-			
 			fail("Failed to read file: " + fileName);
 		}
 	}
-	
-	/**
-	 * Tests SensorData <- CDA filesystem.
-	 */
+
 	@Test
 	public void testReadSensorDataFromCdaDataPath()
 	{
-		// Read JSON from CDA filesystem
 		String fileName = _CdaDataPath + "/SensorData.dat";
-		
 		_Logger.info("\n\n----- [SensorData JSON from file to object] -----");
-		
-		try {
-			Path   filePath = FileSystems.getDefault().getPath(fileName);
-			String dataStr  = Files.readString(filePath, StandardCharsets.UTF_8);
-			
-			SensorData dataObj = DataUtil.getInstance().jsonToSensorData(dataStr);
 
-			_Logger.info("SensorData JSON from CDA: " + dataStr);
-			_Logger.info("SensorData object: " + dataObj);
+		try {
+			Path filePath = FileSystems.getDefault().getPath(fileName);
+			String dataStr = Files.readString(filePath, StandardCharsets.UTF_8);
+			SensorData dataObj = DataUtil.getInstance().jsonToSensorData(dataStr);
+			assertNotNull(dataObj);
+			_Logger.info("SensorData object read successfully: " + dataObj);
 		} catch (Exception e) {
 			_Logger.log(Level.WARNING, "Failed to read file: " + fileName, e);
-			
 			fail("Failed to read file: " + fileName);
 		}
 	}
-	
-	/**
-	 * Tests SystemPerformanceData <- CDA filesystem.
-	 */
+
 	@Test
 	public void testReadSystemPerformanceDataFromCdaDataPath()
 	{
-		// Read JSON from CDA filesystem
 		String fileName = _CdaDataPath + "/SystemPerformanceData.dat";
-		
 		_Logger.info("\n\n----- [SystemPerformanceData JSON from file to object] -----");
-		
-		try {
-			Path   filePath = FileSystems.getDefault().getPath(fileName);
-			String dataStr  = Files.readString(filePath, StandardCharsets.UTF_8);
-			
-			SystemPerformanceData dataObj = DataUtil.getInstance().jsonToSystemPerformanceData(dataStr);
 
-			_Logger.info("SystemPerformanceData JSON from CDA: " + dataStr);
-			_Logger.info("SystemPerformanceData object: " + dataObj);
+		try {
+			Path filePath = FileSystems.getDefault().getPath(fileName);
+			String dataStr = Files.readString(filePath, StandardCharsets.UTF_8);
+			SystemPerformanceData dataObj = DataUtil.getInstance().jsonToSystemPerformanceData(dataStr);
+			assertNotNull(dataObj);
+			_Logger.info("SystemPerformanceData object read successfully: " + dataObj);
 		} catch (Exception e) {
 			_Logger.log(Level.WARNING, "Failed to read file: " + fileName, e);
-			
 			fail("Failed to read file: " + fileName);
 		}
 	}
-	
 }

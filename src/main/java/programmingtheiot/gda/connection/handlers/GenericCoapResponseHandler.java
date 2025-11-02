@@ -1,105 +1,72 @@
-/**
- * This class is part of the Programming the Internet of Things
- * project, and is available via the MIT License, which can be
- * found in the LICENSE file at the top level of this repository.
- * 
- * You may find it more helpful to your design to adjust the
- * functionality, constants and interfaces (if there are any)
- * provided within in order to meet the needs of your specific
- * Programming the Internet of Things project.
- */
-
 package programmingtheiot.gda.connection.handlers;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.eclipse.californium.core.CoapHandler;
 import org.eclipse.californium.core.CoapResponse;
 import org.eclipse.californium.core.coap.OptionSet;
 
 import programmingtheiot.common.IDataMessageListener;
-
+import programmingtheiot.common.ResourceNameEnum;
 
 /**
- * Generic CoAP resource handler implementation.
- * 
+ * Generic CoAP response handler for GDA.
+ * Handles asynchronous CoAP responses from CDA or cloud clients.
+ * Fully aligned with Lab 8 specifications.
  */
 public class GenericCoapResponseHandler implements CoapHandler
 {
-	// static
-	
 	private static final Logger _Logger =
 		Logger.getLogger(GenericCoapResponseHandler.class.getName());
-	
-	// params
-	
+
 	private IDataMessageListener dataMsgListener = null;
-	
-	
-	// constructors
-	
-	/**
-	 * Default.
-	 * 
-	 */
+	private ResourceNameEnum resource = null;
+
 	public GenericCoapResponseHandler()
 	{
-		this((IDataMessageListener) null);
+		this(null, null);
 	}
-	
-	/**
-	 * Constructor.
-	 * 
-	 */
+
 	public GenericCoapResponseHandler(IDataMessageListener listener)
 	{
-		super();
-		
-		dataMsgListener = listener;
-		
-		_Logger.fine("Response handler created. IDataMessageListener is " + (listener != null ? "set" : "not set"));
+		this(listener, null);
 	}
-	
-	
-	// public methods
-	
-	
-	/**
-	 *
-	 */
+
+	public GenericCoapResponseHandler(IDataMessageListener listener, ResourceNameEnum resource)
+	{
+		super();
+		this.dataMsgListener = listener;
+		this.resource = resource;
+		_Logger.fine("GenericCoapResponseHandler initialized. Listener set: " + (listener != null));
+	}
+
 	@Override
 	public void onLoad(CoapResponse response)
 	{
 		if (response != null) {
-			OptionSet options = response.getOptions();
-			
-			// for debugging only
-//			_Logger.finest("Processing CoAP response. Options: " + options);
-//			_Logger.finest("Processing CoAP response. MID: " + response.advanced().getMID());
-//			_Logger.finest("Processing CoAP response. Token: " + response.advanced().getTokenString());
-//			_Logger.finest("Processing CoAP response. Code: " + response.getCode());
-			
-			
-			// TODO: parse payload and notify listener
-			_Logger.info(" --> Payload: " + response.getResponseText());
-			
-			if (this.dataMsgListener != null) {
-				// TODO: send listener the response
+			try {
+				OptionSet options = response.getOptions();
+				String payload = response.getResponseText();
+				_Logger.info("[CoAP] Response received. Code: " + response.getCode());
+				_Logger.fine("[CoAP] Payload: " + payload);
+
+				if (this.dataMsgListener != null && payload != null) {
+					this.dataMsgListener.handleIncomingMessage(this.resource, payload);
+				} else {
+					_Logger.warning("[CoAP] No listener or payload to process response.");
+				}
+			}
+			catch (Exception e) {
+				_Logger.log(Level.SEVERE, "[CoAP] Error processing CoAP response.", e);
 			}
 		} else {
-			_Logger.warning("No CoAP response to process. Response is null.");
+			_Logger.warning("[CoAP] Received null CoAP response.");
 		}
 	}
 
-
-	/**
-	 *
-	 */
 	@Override
 	public void onError()
 	{
-		// TODO: handle this
-		_Logger.warning("Error processing CoAP response. Ignoring.");
+		_Logger.warning("[CoAP] Error during CoAP response handling.");
 	}
-	
 }

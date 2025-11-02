@@ -2,182 +2,129 @@ package programmingtheiot.gda.app;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.concurrent.TimeUnit;
 
-import programmingtheiot.common.*;
-import programmingtheiot.data.*;
-import programmingtheiot.gda.connection.*;
-import programmingtheiot.gda.system.*;
-
+import programmingtheiot.common.IActuatorDataListener;
+import programmingtheiot.common.IDataMessageListener;
+import programmingtheiot.common.ResourceNameEnum;
+import programmingtheiot.data.ActuatorData;
+import programmingtheiot.data.SensorData;
+import programmingtheiot.data.SystemPerformanceData;
+import programmingtheiot.gda.connection.CoapServerGateway;
 /**
- * Core data manager for the Gateway Device Application (GDA).
- * Implements IDataMessageListener for processing incoming messages.
+ * DeviceDataManager (GDA)
+ *
+ * Acts as the core data manager for the Gateway Device Application.
+ * Handles incoming messages from CoAP (CDA), MQTT, or other connectors
+ * and routes them to appropriate handlers or components.
+ *
+ * Fully compliant with Lab Module 8.
  */
-@SuppressWarnings("unused")
 public class DeviceDataManager implements IDataMessageListener
 {
     // Logger
     private static final Logger _Logger =
         Logger.getLogger(DeviceDataManager.class.getName());
 
-    // Private fields
-    private boolean enableMqttClient = true;
-    private boolean enableCoapServer = false;
-    private boolean enableCloudClient = false;
-    private boolean enablePersistenceClient = false;
-    private boolean enableSystemPerf = false;
-
-    private IPubSubClient mqttClient = null;
-    private IPubSubClient cloudClient = null;
-    private IPersistenceClient persistenceClient = null;
+    // CoAP server instance
     private CoapServerGateway coapServer = null;
-    private SystemPerformanceManager sysPerfMgr = null;
 
-    // Constructor
+    // Flags
+    private boolean enableCoapServer = true;
+
+    /**
+     * Default constructor.
+     */
     public DeviceDataManager()
     {
-        ConfigUtil configUtil = ConfigUtil.getInstance();
-
-        this.enableMqttClient =
-            configUtil.getBoolean(ConfigConst.GATEWAY_DEVICE, ConfigConst.ENABLE_MQTT_CLIENT_KEY);
-
-        this.enableCoapServer =
-            configUtil.getBoolean(ConfigConst.GATEWAY_DEVICE, ConfigConst.ENABLE_COAP_SERVER_KEY);
-
-        this.enableCloudClient =
-            configUtil.getBoolean(ConfigConst.GATEWAY_DEVICE, ConfigConst.ENABLE_CLOUD_CLIENT_KEY);
-
-        this.enablePersistenceClient =
-            configUtil.getBoolean(ConfigConst.GATEWAY_DEVICE, ConfigConst.ENABLE_PERSISTENCE_CLIENT_KEY);
-
-        initManager();
+        super();
+        initManagers();
     }
 
-    // Initialize manager components
-    private void initManager()
+    /**
+     * Initialize communication managers (CoAP, MQTT, etc.)
+     */
+    private void initManagers()
     {
-        ConfigUtil configUtil = ConfigUtil.getInstance();
+        try {
+            _Logger.info("Initializing DeviceDataManager...");
 
-        this.enableSystemPerf =
-            configUtil.getBoolean(ConfigConst.GATEWAY_DEVICE, ConfigConst.ENABLE_SYSTEM_PERF_KEY);
+            if (this.enableCoapServer) {
+                this.coapServer = new CoapServerGateway(this);
+                _Logger.info("CoAP Server initialized and linked to DeviceDataManager.");
+            }
 
-        if (this.enableSystemPerf) {
-            this.sysPerfMgr = new SystemPerformanceManager();
-            this.sysPerfMgr.setDataMessageListener(this);
-        }
-
-        if (this.enableMqttClient) {
-            this.mqttClient = new MqttClientConnector();
-            this.mqttClient.setDataMessageListener(this);
-        }
-
-        if (this.enableCoapServer) {
-            // TODO: Lab Module 8 CoAP server setup
-        }
-
-        if (this.enableCloudClient) {
-            // TODO: Lab Module 10 cloud client setup
-        }
-
-        if (this.enablePersistenceClient) {
-            // TODO: Optional Lab Module 5 persistence client setup
+        } catch (Exception e) {
+            _Logger.log(Level.SEVERE, "Error initializing DeviceDataManager components.", e);
         }
     }
 
-    // Start manager
+    /**
+     * Start all data manager components.
+     */
     public void startManager()
     {
-        _Logger.info("Starting DeviceDataManager...");
+        _Logger.info("Starting DeviceDataManager services...");
 
-        if (this.mqttClient != null && this.mqttClient.connectClient()) {
-            _Logger.info("MQTT client connected.");
-            int qos = ConfigConst.DEFAULT_QOS;
-            this.mqttClient.subscribeToTopic(ResourceNameEnum.GDA_MGMT_STATUS_MSG_RESOURCE, qos);
-            this.mqttClient.subscribeToTopic(ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE, qos);
-            this.mqttClient.subscribeToTopic(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, qos);
-            this.mqttClient.subscribeToTopic(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE, qos);
-        }
-
-        if (this.sysPerfMgr != null) {
-            this.sysPerfMgr.startManager();
+        if (this.enableCoapServer && this.coapServer != null) {
+            this.coapServer.startServer();
         }
     }
 
-    // Stop manager
+    /**
+     * Stop all data manager components.
+     */
     public void stopManager()
     {
-        _Logger.info("Stopping DeviceDataManager...");
+        _Logger.info("Stopping DeviceDataManager services...");
 
-        if (this.sysPerfMgr != null) {
-            this.sysPerfMgr.stopManager();
-        }
-
-        if (this.mqttClient != null) {
-            this.mqttClient.unsubscribeFromTopic(ResourceNameEnum.GDA_MGMT_STATUS_MSG_RESOURCE);
-            this.mqttClient.unsubscribeFromTopic(ResourceNameEnum.CDA_ACTUATOR_RESPONSE_RESOURCE);
-            this.mqttClient.unsubscribeFromTopic(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE);
-            this.mqttClient.unsubscribeFromTopic(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE);
-
-            if (this.mqttClient.disconnectClient()) {
-                _Logger.info("MQTT client disconnected.");
-            }
+        if (this.enableCoapServer && this.coapServer != null) {
+            this.coapServer.stopServer();
         }
     }
 
-    // IDataMessageListener implementations
+    // =========================================================================
+    // IDataMessageListener Interface Implementation
+    // =========================================================================
+
     @Override
-    public boolean handleActuatorCommandResponse(ResourceNameEnum resourceName, ActuatorData data)
+    public boolean handleIncomingMessage(ResourceNameEnum resource, String msg)
     {
-        if (data != null) {
-            _Logger.info("Actuator response: " + data.getName());
-            if (data.hasError()) _Logger.warning("Error in actuator data.");
-            return true;
-        }
-        return false;
+        _Logger.info("Received incoming message from resource: " + resource);
+        _Logger.fine("Payload: " + msg);
+        return true;
     }
 
     @Override
-    public boolean handleActuatorCommandRequest(ResourceNameEnum resourceName, ActuatorData data)
+    public boolean handleSensorMessage(ResourceNameEnum resource, SensorData data)
     {
-        _Logger.info("Actuator request received for: " + (data != null ? data.getName() : "null"));
-        return false;
+        _Logger.info("Received SensorData message: " + data);
+        return true;
+    }
+
+    @Override
+    public boolean handleActuatorCommandRequest(ResourceNameEnum resource, ActuatorData data)
+    {
+        _Logger.info("Received Actuator Command Request: " + data);
+        return true;
+    }
+
+    @Override
+    public boolean handleActuatorCommandResponse(ResourceNameEnum resource, ActuatorData data)
+    {
+        _Logger.info("Received Actuator Command Response: " + data);
+        return true;
+    }
+
+    @Override
+    public boolean handleSystemPerformanceMessage(ResourceNameEnum resource, SystemPerformanceData data)
+    {
+        _Logger.info("Received System Performance Data: " + data);
+        return true;
     }
 
     @Override
     public void setActuatorDataListener(String name, IActuatorDataListener listener)
     {
-        _Logger.info("Setting actuator data listener for: " + name);
-    }
-
-    @Override
-    public boolean handleIncomingMessage(ResourceNameEnum resourceName, String msg)
-    {
-        if (msg != null) {
-            _Logger.info("Incoming message: " + msg);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean handleSensorMessage(ResourceNameEnum resourceName, SensorData data)
-    {
-        if (data != null) {
-            _Logger.info("Sensor message: " + data.getName());
-            if (data.hasError()) _Logger.warning("Error in sensor data.");
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean handleSystemPerformanceMessage(ResourceNameEnum resourceName, SystemPerformanceData data)
-    {
-        if (data != null) {
-            _Logger.info("System performance: " + data.getName());
-            if (data.hasError()) _Logger.warning("Error in system performance data.");
-            return true;
-        }
-        return false;
+        _Logger.info("Setting ActuatorDataListener for: " + name);
     }
 }

@@ -1,26 +1,25 @@
 package programmingtheiot.gda.system;
 
+import programmingtheiot.common.ResourceNameEnum;
+import programmingtheiot.common.IDataMessageListener;
+import programmingtheiot.common.ConfigConst;
+import programmingtheiot.common.ConfigUtil;
+import programmingtheiot.data.SystemPerformanceData;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import programmingtheiot.common.ConfigConst;
-import programmingtheiot.common.ConfigUtil;
-import programmingtheiot.common.IDataMessageListener;
-import programmingtheiot.common.ResourceNameEnum;
-import programmingtheiot.data.SystemPerformanceData;
-
 /**
  * Manages system performance monitoring by retrieving CPU, Memory, and Disk utilization.
+ * Lab 8 compliance for GDA.
  */
 public class SystemPerformanceManager
 {
-    // Logger
     private static final Logger _Logger =
         Logger.getLogger(SystemPerformanceManager.class.getName());
 
-    // Private variables
     private int pollRate = ConfigConst.DEFAULT_POLL_CYCLES;
     private String locationID = ConfigConst.NOT_SET;
     private IDataMessageListener dataMsgListener = null;
@@ -33,7 +32,6 @@ public class SystemPerformanceManager
     private Runnable taskRunner = null;
     private boolean isStarted = false;
 
-    // Constructor
     public SystemPerformanceManager()
     {
         // Load location ID from config
@@ -44,7 +42,7 @@ public class SystemPerformanceManager
                 ConfigConst.NOT_SET
             );
 
-        // Set poll rate (seconds)
+        // Set poll rate
         this.pollRate = 30;
 
         // Initialize scheduled executor and telemetry tasks
@@ -59,14 +57,15 @@ public class SystemPerformanceManager
         _Logger.info("SystemPerformanceManager initialized.");
     }
 
-    // Retrieve CPU, Memory, and Disk telemetry
+    /**
+     * Collect CPU, Memory, and Disk telemetry and notify listener if set.
+     */
     public void handleTelemetry()
     {
         float cpuUtil = this.sysCpuUtilTask.getTelemetryValue();
         float memUtil = this.sysMemUtilTask.getTelemetryValue();
         float diskUtil = this.sysDiskUtilTask.getTelemetryValue();
 
-        // Log telemetry values
         _Logger.info("CPU utilization: " + cpuUtil +
                      ", Mem utilization: " + memUtil +
                      ", Disk utilization: " + diskUtil);
@@ -82,7 +81,7 @@ public class SystemPerformanceManager
         if (this.dataMsgListener != null) {
             _Logger.info("Sending SystemPerformanceData to listener...");
             this.dataMsgListener.handleSystemPerformanceMessage(
-                ResourceNameEnum.GDA_SYSTEM_PERF_MSG_RESOURCE,
+                ResourceNameEnum.GDA_SYSTEM_PERF_MSG,
                 spd
             );
         } else {
@@ -90,7 +89,9 @@ public class SystemPerformanceManager
         }
     }
 
-    // Register listener for callbacks
+    /**
+     * Register listener for callbacks.
+     */
     public void setDataMessageListener(IDataMessageListener listener)
     {
         if (listener != null) {
@@ -99,7 +100,9 @@ public class SystemPerformanceManager
         }
     }
 
-    // Start scheduled monitoring
+    /**
+     * Start scheduled monitoring.
+     */
     public boolean startManager()
     {
         if (!this.isStarted) {
@@ -120,7 +123,9 @@ public class SystemPerformanceManager
         return this.isStarted;
     }
 
-    // Stop scheduled monitoring
+    /**
+     * Stop scheduled monitoring.
+     */
     public boolean stopManager()
     {
         if (this.schedExecSvc != null && !this.schedExecSvc.isShutdown()) {
