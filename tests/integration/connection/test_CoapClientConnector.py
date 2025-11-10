@@ -1,163 +1,174 @@
-#####
-# 
-# This class is part of the Programming the Internet of Things
-# project, and is available via the MIT License, which can be
-# found in the LICENSE file at the top level of this repository.
-# 
-# Copyright (c) 2020 - 2025 by Andrew D. King
-# 
-
-import logging
 import unittest
-
-from time import sleep
-
-import programmingtheiot.common.ConfigConst as ConfigConst
-
-from programmingtheiot.common.ConfigUtil import ConfigUtil
-from programmingtheiot.common.DefaultDataMessageListener import DefaultDataMessageListener
-from programmingtheiot.common.ResourceNameEnum import ResourceNameEnum
+import logging
+import time
 
 from programmingtheiot.cda.connection.CoapClientConnector import CoapClientConnector
-
+from programmingtheiot.common.ResourceNameEnum import ResourceNameEnum
 from programmingtheiot.data.DataUtil import DataUtil
 from programmingtheiot.data.SensorData import SensorData
+from programmingtheiot.data.ActuatorData import ActuatorData
+
 
 class CoapClientConnectorTest(unittest.TestCase):
-	"""
-	This test case class contains very basic integration tests for
-	CoapClientConnector using a separately running CoAP server.
-	
-	It should not be considered complete,
-	but serve as a starting point for the student implementing
-	additional functionality within their Programming the IoT
-	environment.
-	
-	NOTE: This is different from CoapServerAdapterTest in that it depends
-	upon an external CoAP server (e.g., the GDA's CoAP server).
-	"""
-	
-	@classmethod
-	def setUpClass(self):
-		logging.basicConfig(format = '%(asctime)s:%(module)s:%(levelname)s:%(message)s', level = logging.INFO)
-		logging.info("Testing CoapClientConnector class...")
-		
-		self.dataMsgListener = DefaultDataMessageListener()
-		
-		self.pollRate = ConfigUtil().getInteger(ConfigConst.CONSTRAINED_DEVICE, ConfigConst.POLL_CYCLES_KEY, ConfigConst.DEFAULT_POLL_CYCLES)
-		
-		self.coapClient = CoapClientConnector()
-		
-	@classmethod
-	def tearDownClass(self):
-		pass
-	
-	def setUp(self):
-		pass
+    """
+    Integration tests for CoapClientConnector.
+    Ensure your GDA CoAP Server is running before executing.
+    """
 
-	def tearDown(self):
-		pass
+    DEFAULT_TIMEOUT = 5
 
-	@unittest.skip("Ignore for now.")
-	def testConnectAndDiscover(self):
-		"""
-		Comment the annotation to test Connect and Discover
-		"""
-		self.coapClient.sendDiscoveryRequest(timeout = 5)
-		
-		sleep(5)
+    @classmethod
+    def setUpClass(cls):
+        logging.basicConfig(level=logging.INFO,
+                            format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+        logging.info("=== Starting CoapClientConnector Integration Tests ===")
 
-	@unittest.skip("Ignore for now.")
-	def testGetActuatorCommandCon(self):
-		"""
-		Comment the annotation to test CON GET
-		"""
-		self.coapClient.sendGetRequest( \
-			resource = ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE, enableCON = True, timeout = 5)
-		
-	@unittest.skip("Ignore for now.")
-	def testGetActuatorCommandNon(self):
-		"""
-		Comment the annotation to test CON GET
-		"""
-		self.coapClient.sendGetRequest( \
-			resource = ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE, enableCON = False, timeout = 5)
-		
-	@unittest.skip("Ignore for now.")
-	def testDeleteSensorMessageCon(self):
-		"""
-		Comment the annotation to test CON DELETE
-		"""
-		self.coapClient.sendDeleteRequest( \
-			resource = ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, enableCON = True, timeout = 5)
-	
-	@unittest.skip("Ignore for now.")
-	def testDeleteSensorMessageNon(self):
-		"""
-		Comment the annotation to test NON DELETE
-		"""
-		self.coapClient.sendDeleteRequest( \
-			resource = ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, enableCON = False, timeout = 5)
+    def setUp(self):
+        self.coapClient = CoapClientConnector()
+        logging.info("CoapClientConnector initialized for testing.")
 
-	@unittest.skip("Ignore for now.")
-	def testPostSensorMessageCon(self):
-		"""
-		Comment the annotation to test CON POST
-		"""
-		data = SensorData()
-		jsonData = DataUtil().sensorDataToJson(data = data)
-		
-		self.coapClient.sendPostRequest( \
-			resource = ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, enableCON = True, payload = jsonData, timeout = 5)
-	
-	@unittest.skip("Ignore for now.")
-	def testPostSensorMessageNon(self):
-		"""
-		Comment the annotation to test NON POST
-		"""
-		data = SensorData()
-		jsonData = DataUtil().sensorDataToJson(data = data)
-		
-		self.coapClient.sendPostRequest( \
-			resource = ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, enableCON = False, payload = jsonData, timeout = 5)
-	
-	@unittest.skip("Ignore for now.")
-	def testPutSensorMessageCon(self):
-		"""
-		Comment the annotation to test CON PUT
-		"""
-		data = SensorData()
-		jsonData = DataUtil().sensorDataToJson(data = data)
-		
-		self.coapClient.sendPutRequest( \
-			resource = ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, enableCON = True, payload = jsonData, timeout = 5)
-	
-	@unittest.skip("Ignore for now.")
-	def testPutSensorMessageNon(self):
-		"""
-		Comment the annotation to test NON PUT
-		"""
-		data = SensorData()
-		jsonData = DataUtil().sensorDataToJson(data = data)
-		
-		self.coapClient.sendPutRequest( \
-			resource = ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, enableCON = False, payload = jsonData, timeout = 5)
+    def tearDown(self):
+        logging.info("Tearing down test case.")
 
-	@unittest.skip("Ignore for now.")
-	def testActuatorCommandObserve(self):
-		"""
-		Comment the annotation to test Observe
-		"""
-		self._startObserver()
-		sleep(30)
-		self._stopObserver()
-		
-	def _startObserver(self):
-		self.coapClient.startObserver(resource = ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE)
+    # ----------------------------------------------------------------
+    # DISCOVERY
+    # ----------------------------------------------------------------
+    #@unittest.skip("Ignore for now.")
+    def testConnectAndDiscover(self):
+        """Test CoAP Discovery (.well-known/core)."""
+        result = self.coapClient.sendDiscoveryRequest(timeout=self.DEFAULT_TIMEOUT)
+        self.assertTrue(result, "Discovery request failed.")
+        time.sleep(2)
 
-	def _stopObserver(self):
-		self.coapClient.stopObserver(resource = ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE)
+    # ----------------------------------------------------------------
+    # GET Requests
+    # ----------------------------------------------------------------
+    #@unittest.skip("Ignore for now.")
+    def testGetActuatorCommandCon(self):
+        """Test GET request (CON)."""
+        result = self.coapClient.sendGetRequest(
+            resource=ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE,
+            enableCON=True,
+            timeout=self.DEFAULT_TIMEOUT
+        )
+        self.assertTrue(result)
+        time.sleep(2)
+
+    #@unittest.skip("Ignore for now.")
+    def testGetActuatorCommandNon(self):
+        """Test GET request (NON)."""
+        result = self.coapClient.sendGetRequest(
+            resource=ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE,
+            enableCON=False,
+            timeout=self.DEFAULT_TIMEOUT
+        )
+        self.assertTrue(result)
+        time.sleep(2)
+
+    # ----------------------------------------------------------------
+    # PUT Requests
+    # ----------------------------------------------------------------
+    #@unittest.skip("Ignore for now.")
+    def testPutSensorMessageCon(self):
+        """Test PUT SensorData (CON)."""
+        data = SensorData()
+        jsonData = DataUtil().sensorDataToJson(data)
+        result = self.coapClient.sendPutRequest(
+            resource=ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE,
+            enableCON=True,
+            payload=jsonData,
+            timeout=self.DEFAULT_TIMEOUT
+        )
+        self.assertTrue(result)
+        time.sleep(2)
+
+    #@unittest.skip("Ignore for now.")
+    def testPutSensorMessageNon(self):
+        """Test PUT SensorData (NON)."""
+        data = SensorData()
+        jsonData = DataUtil().sensorDataToJson(data)
+        result = self.coapClient.sendPutRequest(
+            resource=ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE,
+            enableCON=False,
+            payload=jsonData,
+            timeout=self.DEFAULT_TIMEOUT
+        )
+        self.assertTrue(result)
+        time.sleep(2)
+
+    # ----------------------------------------------------------------
+    # POST Requests
+    # ----------------------------------------------------------------
+    #@unittest.skip("Ignore for now.")
+    def testPostSensorMessageCon(self):
+        """Test POST SensorData (CON)."""
+        data = SensorData()
+        jsonData = DataUtil().sensorDataToJson(data)
+        result = self.coapClient.sendPostRequest(
+            resource=ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE,
+            enableCON=True,
+            payload=jsonData,
+            timeout=self.DEFAULT_TIMEOUT
+        )
+        self.assertTrue(result)
+        time.sleep(2)
+
+    #@unittest.skip("Ignore for now.")
+    def testPostSensorMessageNon(self):
+        """Test POST SensorData (NON)."""
+        data = SensorData()
+        jsonData = DataUtil().sensorDataToJson(data)
+        result = self.coapClient.sendPostRequest(
+            resource=ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE,
+            enableCON=False,
+            payload=jsonData,
+            timeout=self.DEFAULT_TIMEOUT
+        )
+        self.assertTrue(result)
+        time.sleep(2)
+
+    # ----------------------------------------------------------------
+    # DELETE Requests
+    # ----------------------------------------------------------------
+    #@unittest.skip("Ignore for now.")
+    def testDeleteSensorMessageCon(self):
+        """Test DELETE SensorData (CON)."""
+        result = self.coapClient.sendDeleteRequest(
+            resource=ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE,
+            enableCON=True,
+            timeout=self.DEFAULT_TIMEOUT
+        )
+        self.assertTrue(result)
+        time.sleep(2)
+
+    #@unittest.skip("Ignore for now.")
+    def testDeleteSensorMessageNon(self):
+        """Test DELETE SensorData (NON)."""
+        result = self.coapClient.sendDeleteRequest(
+            resource=ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE,
+            enableCON=False,
+            timeout=self.DEFAULT_TIMEOUT
+        )
+        self.assertTrue(result)
+        time.sleep(2)
+
+    # ----------------------------------------------------------------
+    # OBSERVE
+    # ----------------------------------------------------------------
+    #@unittest.skip("Ignore for now.")
+    def testStartAndStopObserve(self):
+        """Test CoAP Observe functionality."""
+        resource = ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE
+        started = self.coapClient.startObserver(resource=resource)
+        self.assertTrue(started, "Failed to start observer.")
+
+        # Let it observe for 10 seconds
+        time.sleep(10)
+
+        stopped = self.coapClient.stopObserver(resource=resource)
+        self.assertTrue(stopped, "Failed to stop observer.")
+        time.sleep(2)
+
 
 if __name__ == "__main__":
-	unittest.main()
-	
+    unittest.main()
