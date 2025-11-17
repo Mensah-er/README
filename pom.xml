@@ -18,7 +18,6 @@
     </properties>
 
     <dependencies>
-
         <!-- Californium CoAP -->
         <dependency>
             <groupId>org.eclipse.californium</groupId>
@@ -50,26 +49,24 @@
             <version>6.8.0</version>
         </dependency>
 
-        <!-- Jakarta Mail (resolvable version) -->
+        <!-- Jakarta Mail -->
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>jakarta.mail</artifactId>
             <version>2.0.1</version>
         </dependency>
 
-        <!-- Eclipse Paho MQTT v5 (correct artifact) -->
+        <!-- MQTT -->
         <dependency>
             <groupId>org.eclipse.paho</groupId>
             <artifactId>org.eclipse.paho.mqttv5.client</artifactId>
             <version>1.2.5</version>
         </dependency>
-        
-        <!-- Eclipse Paho MQTT v3 -->
-		<dependency>
-   			<groupId>org.eclipse.paho</groupId>
-    		<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-    		<version>1.2.5</version>
-		</dependency>
+        <dependency>
+            <groupId>org.eclipse.paho</groupId>
+            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+            <version>1.2.5</version>
+        </dependency>
 
         <!-- Logging -->
         <dependency>
@@ -83,26 +80,25 @@
             <version>2.0.9</version>
         </dependency>
 
-        <!-- JUnit (for tests) -->
+        <!-- JUnit -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
-        
-        <!-- Apache Commons Configuration 2 -->
-		<dependency>
-    		<groupId>org.apache.commons</groupId>
-    		<artifactId>commons-configuration2</artifactId>
-    		<version>2.9.0</version>
-		</dependency>
 
-
+        <!-- Apache Commons Configuration -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-configuration2</artifactId>
+            <version>2.9.0</version>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <!-- Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -113,7 +109,31 @@
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
+
+            <!-- Assembly Plugin for Fat JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>programmingtheiot.gda.app.GatewayDeviceApp</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
-
 </project>
