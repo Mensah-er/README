@@ -76,9 +76,9 @@ public class CloudClientConnectorTest
         sysPerfData.setMemoryUtilization(39.8f);
 
         // Use updated ResourceNameEnum values
-        assertTrue(this.cloudClient.subscribeToCloudEvents(ResourceNameEnum.CDA_ACTUATOR_CMD));
-        assertTrue(this.cloudClient.sendEdgeDataToCloud(ResourceNameEnum.CDA_SENSOR_MSG, sensorData));
-        assertTrue(this.cloudClient.sendEdgeDataToCloud(ResourceNameEnum.CDA_SYSTEM_PERF_MSG, sysPerfData));
+        assertTrue(this.cloudClient.subscribeToCloudEvents(ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE));
+        assertTrue(this.cloudClient.sendEdgeDataToCloud(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, sensorData));
+        assertTrue(this.cloudClient.sendEdgeDataToCloud(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE, sysPerfData));
 
         try {
             Thread.sleep(5000L); // allow data processing
@@ -86,7 +86,7 @@ public class CloudClientConnectorTest
             // ignore
         }
 
-        assertTrue(this.cloudClient.unsubscribeFromCloudEvents(ResourceNameEnum.CDA_ACTUATOR_CMD));
+        assertTrue(this.cloudClient.unsubscribeFromCloudEvents(ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE));
         assertTrue(this.cloudClient.disconnectClient());
     }
 }

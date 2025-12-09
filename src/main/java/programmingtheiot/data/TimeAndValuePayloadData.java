@@ -27,6 +27,7 @@ import programmingtheiot.common.ConfigConst;
  */
 public class TimeAndValuePayloadData implements Serializable
 {
+	private static final long serialVersionUID = 1234567895L;
 	// static
 	
 	

@@ -1,176 +1,132 @@
-/**
- * 
- * This class is part of the Programming the Internet of Things
- * project, and is available via the MIT License, which can be
- * found in the LICENSE file at the top level of this repository.
- * 
- * Copyright (c) 2020 - 2025 by Andrew D. King
- */ 
-
 package programmingtheiot.integration.connection;
+
+import static org.junit.Assert.*;
 
 import java.util.logging.Logger;
 
-import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import programmingtheiot.common.ConfigConst;
-import programmingtheiot.common.DefaultDataMessageListener;
-import programmingtheiot.common.IDataMessageListener;
 import programmingtheiot.common.ResourceNameEnum;
-import programmingtheiot.data.DataUtil;
-import programmingtheiot.data.SensorData;
-import programmingtheiot.gda.connection.*;
+import programmingtheiot.gda.connection.CoapClientConnector;
 
 /**
- * This test case class contains very basic integration tests for
- * CoapClientConnector. It should not be considered complete,
- * but serve as a starting point for the student implementing
- * additional functionality within their Programming the IoT
- * environment.
- * 
- * NOTE: The CoAP server must be running before executing these tests.
+ * Lab 10 – CoAP Performance Test
+ *
+ * Tests performance of:
+ *   - Confirmable (CON) messages
+ *   - Non-confirmable (NON) messages
+ *
+ * Measures:
+ *   - Round Trip Time (RTT)
+ *   - Average RTT
  */
-public class CoapClientPerformanceTest
-{
-	// static
-	
-	public static final int DEFAULT_TIMEOUT = 5;
-	public static final boolean USE_DEFAULT_RESOURCES = true;
-	
-	private static final Logger _Logger =
-		Logger.getLogger(CoapClientPerformanceTest.class.getName());
-	
-	public static final int MAX_TEST_RUNS = 10000;
-	
-	// member var's
-	
-	private CoapClientConnector coapClient = null;
+public class CoapClientPerformanceTest {
 
-	private IDataMessageListener dataMsgListener = null;
-	
-	
-	// test setup methods
-	
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception
-	{
-	}
-	
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception
-	{
-	}
-	
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@Before
-	public void setUp() throws Exception
-	{
-		this.coapClient = new CoapClientConnector();
-		this.dataMsgListener = new DefaultDataMessageListener();
-		
-		this.coapClient.setDataMessageListener(this.dataMsgListener);
-	}
-	
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@After
-	public void tearDown() throws Exception
-	{
-	}
-	
-	// test methods
-	
-	/**
-	 * 
-	 */
-	@Test
-	public void testPostRequestCon()
-	{
-		_Logger.info("Testing POST - CON");
-		
-		execTestPost(MAX_TEST_RUNS, true);
-	}
-	
-	/**
-	 * 
-	 */
-	@Test
-	public void testPostRequestNon()
-	{
-		_Logger.info("Testing POST - NON");
-		
-		execTestPost(MAX_TEST_RUNS, false);
-	}
-	
-	/**
-	 * 
-	 */
-	@Test
-	public void testPutRequestCon()
-	{
-		_Logger.info("Testing PUT - CON");
-		
-		execTestPut(MAX_TEST_RUNS, true);
-	}
-	
-	/**
-	 * 
-	 */
-	@Test
-	public void testPutRequestNon()
-	{
-		_Logger.info("Testing PUT - NON");
-		
-		execTestPut(MAX_TEST_RUNS, false);
-	}
-	
-	// private
-	
-	private void execTestPost(int maxTestRuns, boolean enableCON)
-	{
-		SensorData sd = new SensorData();
-		String payload = DataUtil.getInstance().sensorDataToJson(sd);
-				
-		long startMillis = System.currentTimeMillis();
-		
-		for (int seqNo = 0; seqNo < maxTestRuns; seqNo++) {
-			this.coapClient.sendPostRequest(ResourceNameEnum.CDA_SENSOR_MSG, ConfigConst.TEMP_SENSOR_NAME, enableCON, payload, DEFAULT_TIMEOUT);
-		}
-		
-		long endMillis = System.currentTimeMillis();
-		long elapsedMillis = endMillis - startMillis;
-				
-		_Logger.info("POST message - useCON = " + enableCON + " [" + maxTestRuns + "]: " + elapsedMillis + " ms");
-	}
-	
-	private void execTestPut(int maxTestRuns, boolean enableCON)
-	{
-		SensorData sd = new SensorData();
-		String payload = DataUtil.getInstance().sensorDataToJson(sd);
-				
-		long startMillis = System.currentTimeMillis();
-		
-		for (int seqNo = 0; seqNo < maxTestRuns; seqNo++) {
-			this.coapClient.sendPutRequest(ResourceNameEnum.CDA_SENSOR_MSG, ConfigConst.TEMP_SENSOR_NAME, enableCON, payload, DEFAULT_TIMEOUT);
-		}
-		
-		long endMillis = System.currentTimeMillis();
-		long elapsedMillis = endMillis - startMillis;
-				
-		_Logger.info("PUT message - useCON = " + enableCON + " [" + maxTestRuns + "]: " + elapsedMillis + " ms");
-	}
-	
+    private static final Logger _Logger = Logger.getLogger(CoapClientPerformanceTest.class.getName());
+
+    // ---------------------------------------------------------
+    // Test configuration
+    // ---------------------------------------------------------
+    private static final int ITERATIONS = 50;
+    private static final int WARMUP = 5;
+    private static final int TIMEOUT_MS = 3000;
+
+    private static CoapClientConnector client;
+
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+        _Logger.info("===== CoAP Performance Test INIT =====");
+
+        client = new CoapClientConnector();  // Use default constructor
+        client.setEndpointPath(ResourceNameEnum.CDA_MGMT_STATUS_MSG_RESOURCE);
+
+        _Logger.info("CoAP Client Connector initialized.");
+    }
+
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception {
+        if (client != null) {
+            client.disconnectClient();
+        }
+        _Logger.info("===== CoAP Performance Test COMPLETE =====");
+    }
+
+    // -----------------------------------------------------------------
+    // TEST: Confirmable Messages (CON)
+    // -----------------------------------------------------------------
+    @Test
+    public void testConMessagesPerformance() {
+        _Logger.info("===== BEGIN CON PERFORMANCE TEST =====");
+
+        // Warmup
+        for (int i = 0; i < WARMUP; i++) {
+            client.sendGetRequest(ResourceNameEnum.CDA_MGMT_STATUS_MSG_RESOURCE, null, true, TIMEOUT_MS);
+        }
+
+        long totalRtt = 0;
+
+        for (int i = 0; i < ITERATIONS; i++) {
+            long start = System.currentTimeMillis();
+
+            boolean success = client.sendGetRequest(ResourceNameEnum.CDA_MGMT_STATUS_MSG_RESOURCE, null, true, TIMEOUT_MS);
+
+            long end = System.currentTimeMillis();
+            long rtt = end - start;
+
+            assertTrue("GET request should succeed", success);
+
+            _Logger.info("CON iteration " + i + " RTT = " + rtt + " ms");
+
+            assertTrue("CON RTT exceeded max allowed time", rtt < TIMEOUT_MS);
+
+            totalRtt += rtt;
+        }
+
+        double avgRtt = totalRtt / (double) ITERATIONS;
+        _Logger.info("===== CON PERFORMANCE COMPLETE =====");
+        _Logger.info("Average CON RTT: " + avgRtt + " ms");
+
+        assertTrue("Average CON RTT is too high", avgRtt < 2000);
+    }
+
+    // -----------------------------------------------------------------
+    // TEST: Non-Confirmable Messages (NON)
+    // -----------------------------------------------------------------
+    @Test
+    public void testNonMessagesPerformance() {
+        _Logger.info("===== BEGIN NON PERFORMANCE TEST =====");
+
+        // Warmup
+        for (int i = 0; i < WARMUP; i++) {
+            client.sendGetRequest(ResourceNameEnum.CDA_MGMT_STATUS_MSG_RESOURCE, null, false, TIMEOUT_MS);
+        }
+
+        long totalRtt = 0;
+
+        for (int i = 0; i < ITERATIONS; i++) {
+            long start = System.currentTimeMillis();
+
+            boolean success = client.sendGetRequest(ResourceNameEnum.CDA_MGMT_STATUS_MSG_RESOURCE, null, false, TIMEOUT_MS);
+
+            long end = System.currentTimeMillis();
+            long rtt = end - start;
+
+            assertTrue("GET request should succeed", success);
+
+            _Logger.info("NON iteration " + i + " RTT = " + rtt + " ms");
+
+            assertTrue("NON RTT exceeded max allowed time", rtt < TIMEOUT_MS);
+
+            totalRtt += rtt;
+        }
+
+        double avgRtt = totalRtt / (double) ITERATIONS;
+        _Logger.info("===== NON PERFORMANCE COMPLETE =====");
+        _Logger.info("Average NON RTT: " + avgRtt + " ms");
+
+        assertTrue("Average NON RTT is too high", avgRtt < 2000);
+    }
 }

@@ -40,7 +40,9 @@ public class GenericCoapResourceHandler extends CoapResource {
      * Constructor for ResourceNameEnum usage (preferred for CoapServerGateway)
      */
     public GenericCoapResourceHandler(IDataMessageListener listener, ResourceNameEnum resource) {
-        super(resource.getResourceName());
+        //super(resource.getResourceName());
+        super(resource.getResourceName().substring(resource.getResourceName().lastIndexOf("/") + 1));
+
 
         if (listener instanceof DeviceDataManager) {
             this.devDataMgr = (DeviceDataManager) listener;

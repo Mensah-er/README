@@ -56,7 +56,7 @@ public class DeviceDataManagerWithCommsTest
         String sdJson = DataUtil.getInstance().sensorDataToJson(sd);
 
         // Publish message to CDA_SENSOR_MSG
-        mqttClient.publishMessage(ResourceNameEnum.CDA_SENSOR_MSG, sdJson, 1);
+        mqttClient.publishMessage(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, sdJson, 1);
 
         try {
             Thread.sleep(10000L); // wait for 10 seconds to allow message processing

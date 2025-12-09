@@ -1,0 +1,46 @@
+[[1;34mINFO[m] Scanning for projects...
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--------------< [0;36mprogrammingtheiot.gda:gateway-device-app[0;1m >--------------[m
+[[1;34mINFO[m] [1mBuilding Gateway Device App 0.0.1[m
+[[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-clean-plugin:2.5:clean[m [1m(default-clean)[m @ [36mgateway-device-app[0;1m ---[m
+[[1;34mINFO[m] Deleting /home/ernest/piot/gda-java-components/target
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:resources[m [1m(default-resources)[m @ [36mgateway-device-app[0;1m ---[m
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered resources.
+[[1;34mINFO[m] skip non existing resourceDirectory /home/ernest/piot/gda-java-components/src/main/resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.11.0:compile[m [1m(default-compile)[m @ [36mgateway-device-app[0;1m ---[m
+[[1;34mINFO[m] Changes detected - recompiling the module! :source
+[[1;34mINFO[m] Compiling 41 source files with javac [debug target 11] to target/classes
+[[1;33mWARNING[m] system modules path not set in conjunction with -source 11
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:testResources[m [1m(default-testResources)[m @ [36mgateway-device-app[0;1m ---[m
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered resources.
+[[1;34mINFO[m] skip non existing resourceDirectory /home/ernest/piot/gda-java-components/src/test/resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.11.0:testCompile[m [1m(default-testCompile)[m @ [36mgateway-device-app[0;1m ---[m
+[[1;34mINFO[m] Changes detected - recompiling the module! :dependency
+[[1;34mINFO[m] Compiling 29 source files with javac [debug target 11] to target/test-classes
+[[1;33mWARNING[m] system modules path not set in conjunction with -source 11
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-surefire-plugin:2.12.4:test[m [1m(default-test)[m @ [36mgateway-device-app[0;1m ---[m
+[[1;34mINFO[m] Surefire report directory: /home/ernest/piot/gda-java-components/target/surefire-reports
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running programmingtheiot.integration.connection.MqttClientPerformanceTest
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 31.783 sec
+
+Results :
+
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
+
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] [1;32mBUILD SUCCESS[m
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] Total time:  35.704 s
+[[1;34mINFO[m] Finished at: 2025-11-17T03:44:41-05:00
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m

@@ -6,27 +6,15 @@ import java.util.logging.Logger;
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.CoapServer;
 import org.eclipse.californium.core.network.Endpoint;
-import org.eclipse.californium.core.network.config.NetworkConfig;
 import org.eclipse.californium.core.network.interceptors.MessageTracer;
 
 import programmingtheiot.common.IDataMessageListener;
 import programmingtheiot.common.ResourceNameEnum;
-import programmingtheiot.gda.connection.handlers.GenericCoapResourceHandler;
-import programmingtheiot.gda.connection.handlers.GetActuatorCommandResourceHandler;
 import programmingtheiot.gda.connection.handlers.UpdateSystemPerformanceResourceHandler;
 import programmingtheiot.gda.connection.handlers.UpdateTelemetryResourceHandler;
+import programmingtheiot.gda.connection.handlers.GetActuatorCommandResourceHandler;
+import programmingtheiot.gda.connection.handlers.GenericCoapResourceHandler;
 
-/**
- * CoapServerGateway
- *
- * Provides CoAP server functionality for the Gateway Device Application (GDA).
- * Fully compliant with PIOT-GDA-08-001 through PIOT-GDA-08-003.
- *
- * Responsibilities:
- *  - Instantiate and configure CoAP server (Californium)
- *  - Register all required CoAP resource handlers
- *  - Manage start/stop lifecycle
- */
 public class CoapServerGateway
 {
     private static final Logger _Logger =
@@ -35,58 +23,44 @@ public class CoapServerGateway
     private CoapServer coapServer = null;
     private IDataMessageListener dataMsgListener = null;
 
-    /**
-     * Constructor - receives reference to DeviceDataManager (as IDataMessageListener).
-     */
     public CoapServerGateway(IDataMessageListener dataMsgListener)
     {
         this.dataMsgListener = dataMsgListener;
 
         // Initialize CoAP server with all required resources
         initServer(
-            ResourceNameEnum.GDA_SENSOR_MSG,
-            ResourceNameEnum.GDA_ACTUATOR_CMD,
-            ResourceNameEnum.GDA_UPDATE_NOTIFICATIONS,
-            ResourceNameEnum.GDA_SYSTEM_PERF_MSG
+            ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE,
+            ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE,
+            ResourceNameEnum.CDA_UPDATE_NOTIFICATIONS_MSG,
+            ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE
         );
     }
 
-    /**
-     * Initializes CoAP server and registers all resource handlers.
-     */
     private void initServer(ResourceNameEnum... resources)
     {
         try {
-        	this.coapServer = new CoapServer(NetworkConfig.getStandard());
+            this.coapServer = new CoapServer();
 
-            // ====== Generic Handlers (for all declared ResourceNameEnum values) ======
             if (resources != null) {
                 for (ResourceNameEnum r : resources) {
                     addResource(r);
                 }
             }
 
-            // ====== Specific Handlers for Lab 8 ======
-
-            // System Performance Handler
+            // Specific handlers
             UpdateSystemPerformanceResourceHandler sysHandler =
-                new UpdateSystemPerformanceResourceHandler(
-                    ResourceNameEnum.GDA_SYSTEM_PERF_MSG.getResourceName());
+                new UpdateSystemPerformanceResourceHandler("SystemPerfMsg");
             sysHandler.setDataMessageListener(this.dataMsgListener);
-            this.coapServer.add(sysHandler);
+            coapServer.add(sysHandler);
 
-            // Telemetry Handler
             UpdateTelemetryResourceHandler telemHandler =
-                new UpdateTelemetryResourceHandler(
-                    ResourceNameEnum.GDA_SENSOR_MSG.getResourceName());
+                new UpdateTelemetryResourceHandler("SensorMsg");
             telemHandler.setDataMessageListener(this.dataMsgListener);
-            this.coapServer.add(telemHandler);
+            coapServer.add(telemHandler);
 
-            // Actuator Command Handler (Observable)
             GetActuatorCommandResourceHandler actHandler =
-                new GetActuatorCommandResourceHandler(
-                    ResourceNameEnum.GDA_ACTUATOR_CMD.getResourceName());
-            this.coapServer.add(actHandler);
+                new GetActuatorCommandResourceHandler("ActuatorCmd");
+            coapServer.add(actHandler);
 
             _Logger.info("CoAP Server initialized successfully with all resource handlers.");
         }
@@ -95,13 +69,11 @@ public class CoapServerGateway
         }
     }
 
-    /**
-     * Adds a generic resource handler for a given ResourceNameEnum entry.
-     */
     private void addResource(ResourceNameEnum resource)
     {
         if (resource != null && coapServer != null) {
             try {
+                // Use ResourceNameEnum constructor instead of String
                 CoapResource handler = new GenericCoapResourceHandler(this.dataMsgListener, resource);
                 coapServer.add(handler);
                 _Logger.info("Added CoAP resource: " + resource.getResourceName());
@@ -111,17 +83,12 @@ public class CoapServerGateway
         }
     }
 
-    /**
-     * Starts the CoAP server.
-     * Adds a message tracer to each endpoint for debug visibility.
-     */
     public boolean startServer()
     {
         try {
             if (this.coapServer != null) {
                 this.coapServer.start();
 
-                // For logging and tracing messages
                 for (Endpoint ep : this.coapServer.getEndpoints()) {
                     ep.addInterceptor(new MessageTracer());
                 }
@@ -138,9 +105,6 @@ public class CoapServerGateway
         return false;
     }
 
-    /**
-     * Stops the CoAP server.
-     */
     public boolean stopServer()
     {
         try {
@@ -158,9 +122,6 @@ public class CoapServerGateway
         return false;
     }
 
-    /**
-     * Optional method to set or change the data message listener.
-     */
     public void setDataMessageListener(IDataMessageListener listener)
     {
         if (listener != null) {

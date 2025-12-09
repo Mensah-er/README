@@ -59,13 +59,13 @@ public class CoapClientConnectorTest
     @Test
     public void testGetRequestCon()
     {
-        assertTrue(this.coapClient.sendGetRequest(ResourceNameEnum.GDA_SENSOR_MSG, null, true, DEFAULT_TIMEOUT));
+        assertTrue(this.coapClient.sendGetRequest(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, null, true, DEFAULT_TIMEOUT));
     }
 
     @Test
     public void testGetRequestNon()
     {
-        assertTrue(this.coapClient.sendGetRequest(ResourceNameEnum.GDA_SENSOR_MSG, null, false, DEFAULT_TIMEOUT));
+        assertTrue(this.coapClient.sendGetRequest(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, null, false, DEFAULT_TIMEOUT));
     }
 
     @Test
@@ -75,7 +75,7 @@ public class CoapClientConnectorTest
         ssd.setCommand(1);
         String ssdJson = DataUtil.getInstance().systemStateDataToJson(ssd);
 
-        assertTrue(this.coapClient.sendPostRequest(ResourceNameEnum.GDA_SENSOR_MSG, null, true, ssdJson, DEFAULT_TIMEOUT));
+        assertTrue(this.coapClient.sendPostRequest(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, null, true, ssdJson, DEFAULT_TIMEOUT));
     }
 
     @Test
@@ -85,7 +85,7 @@ public class CoapClientConnectorTest
         ssd.setCommand(1);
         String ssdJson = DataUtil.getInstance().systemStateDataToJson(ssd);
 
-        assertTrue(this.coapClient.sendPostRequest(ResourceNameEnum.GDA_SENSOR_MSG, null, false, ssdJson, DEFAULT_TIMEOUT));
+        assertTrue(this.coapClient.sendPostRequest(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, null, false, ssdJson, DEFAULT_TIMEOUT));
     }
 
     @Test
@@ -95,7 +95,7 @@ public class CoapClientConnectorTest
         ssd.setCommand(2);
         String ssdJson = DataUtil.getInstance().systemStateDataToJson(ssd);
 
-        assertTrue(this.coapClient.sendPutRequest(ResourceNameEnum.GDA_SENSOR_MSG, null, true, ssdJson, DEFAULT_TIMEOUT));
+        assertTrue(this.coapClient.sendPutRequest(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, null, true, ssdJson, DEFAULT_TIMEOUT));
     }
 
     @Test
@@ -105,18 +105,18 @@ public class CoapClientConnectorTest
         ssd.setCommand(2);
         String ssdJson = DataUtil.getInstance().systemStateDataToJson(ssd);
 
-        assertTrue(this.coapClient.sendPutRequest(ResourceNameEnum.GDA_SENSOR_MSG, null, false, ssdJson, DEFAULT_TIMEOUT));
+        assertTrue(this.coapClient.sendPutRequest(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, null, false, ssdJson, DEFAULT_TIMEOUT));
     }
 
     @Test
     public void testDeleteRequestCon()
     {
-        assertTrue(this.coapClient.sendDeleteRequest(ResourceNameEnum.GDA_ACTUATOR_CMD, null, true, DEFAULT_TIMEOUT));
+        assertTrue(this.coapClient.sendDeleteRequest(ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE, null, true, DEFAULT_TIMEOUT));
     }
 
     @Test
     public void testDeleteRequestNon()
     {
-        assertTrue(this.coapClient.sendDeleteRequest(ResourceNameEnum.GDA_ACTUATOR_CMD, null, false, DEFAULT_TIMEOUT));
+        assertTrue(this.coapClient.sendDeleteRequest(ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE, null, false, DEFAULT_TIMEOUT));
     }
 }

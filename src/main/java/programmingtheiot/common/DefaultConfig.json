@@ -1,0 +1,15 @@
+{
+  "humidityMaxTimePastThreshold": 30,
+  "temperatureMaxTimePastThreshold": 30,
+  "co2MaxTimePastThreshold": 30,
+  "pressureMaxTimePastThreshold": 30,
+  "sensorDataUpdateRate": 10,
+  "actuatorCommandUpdateRate": 5,
+  "systemPerformanceUpdateRate": 15,
+  "gatewayDeviceId": "GDA001",
+  "mqttBrokerHost": "localhost",
+  "mqttBrokerPort": 1883,
+  "coapServerPort": 5683,
+  "useEncryptedConnections": false,
+  "loggingLevel": "INFO"
+}

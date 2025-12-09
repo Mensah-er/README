@@ -19,65 +19,38 @@ import programmingtheiot.gda.app.GatewayDeviceApp;
 public class GatewayDeviceAppTest
 {
 	// static
-	
 	private static final Logger _Logger = Logger.getLogger(GatewayDeviceAppTest.class.getName());
 	
-
-	// member var's
-	
+	// member var
 	private GatewayDeviceApp gda = null;
 	
-	
 	// test setup methods
-	
-	/**
-	 * @throws java.lang.Exception
-	 */
 	@BeforeClass
-	public static void setUpBeforeClass() throws Exception
-	{
-	}
-	
-	/**
-	 * @throws java.lang.Exception
-	 */
+	public static void setUpBeforeClass() throws Exception { }
+
 	@AfterClass
-	public static void tearDownAfterClass() throws Exception
-	{
-	}
-	
-	/**
-	 * @throws java.lang.Exception
-	 */
+	public static void tearDownAfterClass() throws Exception { }
+
 	@Before
 	public void setUp() throws Exception
 	{
-		//gda = new GatewayDeviceApp();
-		gda = new GatewayDeviceApp(new String[0]); // empty args
+		// Override stopApp to avoid System.exit() during tests
+		gda = new GatewayDeviceApp(new String[0]) {
+			@Override
+			public void stopApp(int code) {
+				super.stopAppWithoutExit();
+			}
+		};
 	}
-	
-	/**
-	 * @throws java.lang.Exception
-	 */
+
 	@After
-	public void tearDown() throws Exception
-	{
-	}
-	
+	public void tearDown() throws Exception { }
+
 	// test methods
-	
-	/**
-	 * Convenience test method for starting and stopping the GDA. This will invoke both
-	 * {@link programmingtheiot.gda.app.GatewayDeviceApp#startApp()} and
-	 * {@link programmingtheiot.gda.app.GatewayDeviceApp#stopApp(int)} in sequence.
-	 * <p>
-	 * Validation is via log output and the expectation that no exception will be
-	 * thrown during execution.
-	 */
 	@Test
 	public void testStartAndStopGatewayApp()
 	{
-		 _Logger.info("Running testStartAndStopGatewayApp...");
+		_Logger.info("Running testStartAndStopGatewayApp...");
 		this.gda.startApp();
 		
 		try {
@@ -88,5 +61,4 @@ public class GatewayDeviceAppTest
 		
 		this.gda.stopApp(0);
 	}
-	
 }

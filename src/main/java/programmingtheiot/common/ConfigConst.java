@@ -157,15 +157,19 @@ public class ConfigConst
 	public static final String MEM_UTIL_NAME  = "MemUtil";
 
 	public static final String MEDIA_MSG       = "MediaMsg";
-	public static final String SENSOR_MSG      = "SensorMsg";
-	public static final String ACTUATOR_CMD    = "ActuatorCmd";
-	public static final String ACTUATOR_RESPONSE = "ActuatorResponse";
-	public static final String MGMT_STATUS_MSG = "MgmtStatusMsg";
-	public static final String MGMT_STATUS_CMD = "MgmtStatusCmd";
-	public static final String SYSTEM_PERF_MSG = "SystemPerfMsg";
-	
-	public static final String UPDATE_NOTIFICATIONS_MSG      = "UpdateMsg";
+	/**** CDA-specific Resource Mappings (for MQTT topics) ****/
+	public static final String CDA_SENSOR_DATA_MSG_RESOURCE       = "SENSOR_MSG";
+	public static final String CDA_ACTUATOR_CMD_MSG_RESOURCE      = "ACTUATOR_CMD";
+	public static final String CDA_ACTUATOR_RESPONSE_MSG_RESOURCE = "ACTUATOR_RESPONSE";
+	public static final String CDA_MGMT_STATUS_MSG_RESOURCE       = "MGMT_STATUS_MSG";
+	public static final String CDA_MGMT_STATUS_CMD_RESOURCE       = "MGMT_STATUS_CMD";
+	public static final String CDA_SYSTEM_PERF_MSG_RESOURCE       = "SYSTEM_PERF_MSG";
+	public static final String UPDATE_NOTIFICATIONS_RESOURCE     = "UpdateMsg";
 	public static final String RESOURCE_REGISTRATION_REQUEST = "ResourceRegRequest";
+	
+	
+
+
 
 	/*****
 	 * Configuration Sections, Keys and Defaults

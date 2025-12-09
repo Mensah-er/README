@@ -105,7 +105,7 @@ public class SmtpClientConnectorTest
 		
 		String ssdJson = DataUtil.getInstance().systemStateDataToJson(ssd);
 		
-		assertTrue(this.smtpClient.sendMessage(ResourceNameEnum.GDA_MGMT_STATUS_MSG_RESOURCE, ssdJson, DEFAULT_TIMEOUT));
+		assertTrue(this.smtpClient.sendMessage(ResourceNameEnum.CDA_MGMT_STATUS_MSG_RESOURCE, ssdJson, DEFAULT_TIMEOUT));
 	}
 	
 }

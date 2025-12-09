@@ -12,7 +12,7 @@
 package programmingtheiot.data;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+//import java.util.ArrayList;
 import java.util.List;
 
 import programmingtheiot.common.ConfigConst;
@@ -27,6 +27,7 @@ import programmingtheiot.common.ConfigConst;
  */
 public class SystemStateData extends BaseIotData implements Serializable
 {
+	private static final long serialVersionUID = 1234567894L;
 	// static
 	
 	

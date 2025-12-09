@@ -81,7 +81,7 @@ public class SystemPerformanceManager
         if (this.dataMsgListener != null) {
             _Logger.info("Sending SystemPerformanceData to listener...");
             this.dataMsgListener.handleSystemPerformanceMessage(
-                ResourceNameEnum.GDA_SYSTEM_PERF_MSG,
+                ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE,
                 spd
             );
         } else {

@@ -9,33 +9,19 @@ import java.util.logging.Logger;
  */
 public class GatewayDeviceApp
 {
-    // Static logger
     private static final Logger _Logger =
         Logger.getLogger(GatewayDeviceApp.class.getName());
 
-    // Class-scoped DeviceDataManager
     private DeviceDataManager dataMgr = null;
 
-    /**
-     * Constructor
-     * 
-     * @param args Command line arguments
-     */
     public GatewayDeviceApp(String[] args)
     {
         super();
         _Logger.info("Initializing GDA...");
-
-        // Parse arguments (currently ignored)
         parseArgs(args);
-
-        // Instantiate DeviceDataManager
         this.dataMgr = new DeviceDataManager();
     }
 
-    /**
-     * Start the GDA application.
-     */
     public void startApp()
     {
         _Logger.info("Starting GDA...");
@@ -51,11 +37,6 @@ public class GatewayDeviceApp
         }
     }
 
-    /**
-     * Stop the GDA application.
-     * 
-     * @param code Exit code
-     */
     public void stopApp(int code)
     {
         _Logger.info("Stopping GDA...");
@@ -73,32 +54,34 @@ public class GatewayDeviceApp
     }
 
     /**
-     * Initialize configuration (stub).
-     * 
-     * @param fileName Configuration file
+     * Stops GDA without calling System.exit(), useful for tests.
      */
+    public void stopAppWithoutExit()
+    {
+        _Logger.info("Stopping GDA without exiting...");
+
+        try {
+            if (this.dataMgr != null) {
+                this.dataMgr.stopManager();
+            }
+            _Logger.info("GDA stopped successfully (without exit).");
+        } catch (Exception e) {
+            _Logger.log(Level.SEVERE, "Failed to cleanly stop GDA.", e);
+        }
+    }
+
     private void initConfig(String fileName)
     {
         _Logger.info("Attempting to load configuration: " +
             (fileName == null ? "Default." : fileName));
     }
 
-    /**
-     * Parse command line arguments (currently stub).
-     * 
-     * @param args Command line arguments
-     */
     private void parseArgs(String[] args)
     {
         _Logger.info("No command line args to parse.");
         initConfig(null);
     }
 
-    /**
-     * Main application entry point.
-     * 
-     * @param args Command line arguments
-     */
     public static void main(String[] args)
     {
         GatewayDeviceApp gwApp = new GatewayDeviceApp(args);
@@ -106,10 +89,8 @@ public class GatewayDeviceApp
         gwApp.startApp();
 
         try {
-            Thread.sleep(65000L); // run for ~65 seconds
-        } catch (InterruptedException e) {
-            // ignore
-        }
+            Thread.sleep(65000L); 
+        } catch (InterruptedException e) { }
 
         gwApp.stopApp(0);
     }

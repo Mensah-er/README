@@ -76,7 +76,7 @@ public class CoapServerGatewayTest {
             _Logger.info("Constrained device GET response: " + constrainedResponse);
 
             String sysPerfResponse = clientConn.setURI(url + "/" +
-                                          ResourceNameEnum.GDA_SYSTEM_PERF_MSG.getResourceName()).get().getResponseText();
+                                          ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE.getResourceName()).get().getResponseText();
             assertNotNull("System performance GET response is null", sysPerfResponse);
             _Logger.info("System performance GET response: " + sysPerfResponse);
 
