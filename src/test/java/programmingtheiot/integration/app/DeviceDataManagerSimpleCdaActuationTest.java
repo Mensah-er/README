@@ -1,12 +1,12 @@
 package programmingtheiot.integration.app;
 
-import static org.junit.Assert.*;
+//import static org.junit.Assert.*;
+
+import java.util.logging.Logger;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.logging.Logger;
 
 import programmingtheiot.common.ConfigConst;
 import programmingtheiot.common.ConfigUtil;
@@ -14,86 +14,73 @@ import programmingtheiot.common.ResourceNameEnum;
 import programmingtheiot.data.SensorData;
 import programmingtheiot.gda.app.DeviceDataManager;
 
-/**
- * Simple test for DeviceDataManager humidity actuation logic.
- */
 public class DeviceDataManagerSimpleCdaActuationTest
 {
     private static final Logger _Logger =
-            Logger.getLogger(DeviceDataManagerSimpleCdaActuationTest.class.getName());
+        Logger.getLogger(DeviceDataManagerSimpleCdaActuationTest.class.getName());
 
     private DeviceDataManager devDataMgr;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() throws Exception
+    {
         devDataMgr = new DeviceDataManager();
         devDataMgr.startManager();
+        _Logger.info("=== DeviceDataManager STARTED ===");
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() throws Exception
+    {
         devDataMgr.stopManager();
+        _Logger.info("=== DeviceDataManager STOPPED ===");
     }
 
     @Test
-    public void testSendActuationEventsToCda() {
-        ConfigUtil cfgUtil = ConfigUtil.getInstance();
-
-        float nominalVal = cfgUtil.getFloat(ConfigConst.GATEWAY_DEVICE, "nominalHumiditySetting");
-        float lowVal     = cfgUtil.getFloat(ConfigConst.GATEWAY_DEVICE, "triggerHumidifierFloor");
-        float highVal    = cfgUtil.getFloat(ConfigConst.GATEWAY_DEVICE, "triggerHumidifierCeiling");
-
-        int delay = 5; // force test threshold
-
-        generateAndProcessHumiditySensorDataSequence(
-                devDataMgr, nominalVal, lowVal, highVal, delay
-        );
-    }
-
-    private void generateAndProcessHumiditySensorDataSequence(DeviceDataManager ddm,
-                                                              float nominalVal,
-                                                              float lowVal,
-                                                              float highVal,
-                                                              int delay)
+    public void testSendActuationEventsToCda()
     {
+        ConfigUtil cfg = ConfigUtil.getInstance();
+
+        float nominalVal = cfg.getFloat(ConfigConst.GATEWAY_DEVICE, "nominalHumiditySetting");
+        float lowVal     = cfg.getFloat(ConfigConst.GATEWAY_DEVICE, "triggerHumidifierFloor");
+        int delay        = cfg.getInteger(ConfigConst.GATEWAY_DEVICE, "humidityMaxTimePastThreshold");
+
+        _Logger.info("Test config → nominal=" + nominalVal +
+                     ", floor=" + lowVal +
+                     ", delay=" + delay);
+
         SensorData sd = new SensorData();
-        sd.setName("Test Humidity Sensor");
+        sd.setName("TestHumiditySensor");
         sd.setLocationID("constraineddevice001");
         sd.setTypeID(ConfigConst.HUMIDITY_SENSOR_TYPE);
 
-        // Two normal messages (no actuation)
+        // ---- normal readings ----
         sd.setValue(nominalVal);
-        ddm.handleSensorMessage(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, sd);
+        devDataMgr.handleSensorMessage(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, sd);
         waitForSeconds(2);
 
         sd.setValue(nominalVal);
-        ddm.handleSensorMessage(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, sd);
+        devDataMgr.handleSensorMessage(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, sd);
         waitForSeconds(2);
 
-        // Exceptional value triggers ON event after threshold
-        sd.setValue(lowVal - 2);
-        ddm.handleSensorMessage(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, sd);
-        waitForSeconds(delay + 1);
+        // ---- abnormal (LOW) triggers ON after delay ----
+        sd.setValue(lowVal - 10);
+        devDataMgr.handleSensorMessage(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, sd);
+        waitForSeconds(delay + 2);
 
-        sd.setValue(lowVal - 1);
-        ddm.handleSensorMessage(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, sd);
-        waitForSeconds(delay + 1);
+        sd.setValue(lowVal - 5);
+        devDataMgr.handleSensorMessage(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, sd);
+        waitForSeconds(delay + 2);
 
-        // Nominal value triggers OFF event after threshold
-        sd.setValue(lowVal + 1);
-        ddm.handleSensorMessage(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, sd);
-        waitForSeconds(delay + 1);
-
+        // ---- return to normal triggers OFF ----
         sd.setValue(nominalVal);
-        ddm.handleSensorMessage(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, sd);
-        waitForSeconds(delay + 1);
+        devDataMgr.handleSensorMessage(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, sd);
+        waitForSeconds(delay + 2);
     }
 
-    private void waitForSeconds(int seconds) {
-        try {
-            Thread.sleep(seconds * 1000L);
-        } catch (InterruptedException e) {
-            // ignore
-        }
+    private void waitForSeconds(int s)
+    {
+        try { Thread.sleep(s * 1000L); }
+        catch (InterruptedException e) {}
     }
 }

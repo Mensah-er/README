@@ -1,28 +1,51 @@
 #####
 # Configuration file for the Gateway Device App (GDA)
 #
-# This provides a section-based configuration format for use by
-# ConfigUtil with keys defined in ConfigConst.
-#
-# IMPORTANT: Edit this file to meet your local system requirements.
-#
 
 #
-# Cloud client configuration information
+# Cloud client selector (USED BY CloudClientFactory)
 #
 [Cloud.GatewayService]
-credFile       = ./cred/PiotCloudCred.props
-certFile       = ./cert/PiotCloudCert.pem
-host           = localhost
+cloudServiceName = Ubidots
+
+
+#
+# Ubidots Cloud configuration
+#
+[Cloud.GatewayService.Ubidots]
+credFile       = /home/ernest/piot/gda-java-components/cred/UbidotsCloudCred.props
+certFile       = /home/ernest/piot/gda-java-components/cert/UbidotsCloudCert.pem
+cloudServiceName = Ubidots
+host           = industrial.api.ubidots.com
 port           = 1883
 securePort     = 8883
 defaultQoS     = 0
-keepAlive      = 60
+keepAlive      = 30
 useAsyncClient = True
 enableAuth     = True
 enableCrypt    = True
-baseUrl        = 
-baseTopic      = 
+baseUrl        = https://things.ubidots.com/api/v1.6/
+baseTopic      = /v1.6/devices/
+clientID       = gda-device
+
+
+#
+# AWS Cloud configuration (placeholder – not active)
+#
+[Cloud.GatewayService.AWS]
+credFile         = ./cred/AwsCloudCred.props
+certFile         = ./cert/AwsCloudCert.pem
+privateKeyFile   = ./cert/AwsCloudKey.key
+cloudServiceName = AWS
+host             = example.amazonaws.com
+securePort       = 8883
+defaultQoS       = 1
+keepAlive        = 60
+enableAuth       = True
+enableCrypt      = True
+baseUrl          =
+baseTopic        =
+
 
 #
 # SMTP client configuration information
@@ -35,12 +58,11 @@ securePort     = 587
 enableAuth     = True
 enableCrypt    = True
 
+
 #
-# MQTT client configuration information
+# MQTT client configuration information (LOCAL broker)
 #
 [Mqtt.GatewayService]
-#credFile       = ./cred/PiotMqttCred.props
-#certFile       = ./cert/PiotMqttLocalCertFile.pem
 credFile       = ./cred/PiotMqttCred.props
 certFile       = /home/ernest/piot/mosq_certs/ca.crt
 host           = localhost
@@ -66,6 +88,7 @@ enableAuth     = False
 enableCrypt    = False
 enableConfirmedMsgs = True
 
+
 #
 # GDA specific configuration information
 #
@@ -76,10 +99,10 @@ pollCycleSecs           = 60
 enableMqttClient        = True
 enableCoapServer        = True
 enableCoapClient        = False
-enableCloudClient       = False
+enableCloudClient       = True
 enableSmtpClient        = False
 enablePersistenceClient = False
-enableSystemPerformance = False
+enableSystemPerformance = True
 testGdaDataPath         = /tmp/gda-data
 testCdaDataPath         = /tmp/cda-data
 testEmptyApp            = False
@@ -91,7 +114,7 @@ temperatureMinThreshold         = 0
 temperatureMaxThreshold         = 50
 humidityMinThreshold            = 20
 humidityMaxThreshold            = 80
-humidityMaxTimePastThreshold    = 5
+humidityMaxTimePastThreshold    = 10
 nominalHumiditySetting          = 40.0
 triggerHumidifierFloor          = 30.0
 triggerHumidifierCeiling        = 50.0
@@ -104,3 +127,4 @@ coapServerPort                  = 5683
 coapSecurePort                  = 5684
 mqttDefaultQoS                  = 0
 mqttKeepAlive                   = 60
+

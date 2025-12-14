@@ -8,21 +8,19 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import programmingtheiot.common.ConfigConst;
 import programmingtheiot.common.ResourceNameEnum;
 import programmingtheiot.data.SensorData;
 import programmingtheiot.data.SystemPerformanceData;
 import programmingtheiot.gda.app.DeviceDataManager;
-import programmingtheiot.gda.connection.ICloudClient;
 import programmingtheiot.gda.connection.CloudClientConnector;
 import programmingtheiot.common.DefaultDataMessageListener;
-import programmingtheiot.common.ConfigConst;
+import programmingtheiot.gda.connection.ICloudClient;
 
-/**
- * Basic integration tests for CloudClientConnector (Lab 8).
- */
 public class CloudClientConnectorTest
 {
-    private static final Logger _Logger = Logger.getLogger(CloudClientConnectorTest.class.getName());
+    private static final Logger _Logger =
+        Logger.getLogger(CloudClientConnectorTest.class.getName());
 
     private ICloudClient cloudClient = null;
 
@@ -35,8 +33,12 @@ public class CloudClientConnectorTest
     @After
     public void tearDown() throws Exception
     {
+        // nothing required
     }
 
+    /**
+     * Ensures CloudClientConnector + DeviceDataManager start/stop cleanly.
+     */
     @Test
     public void testIntegratedCloudClientConnectAndDisconnect()
     {
@@ -44,49 +46,81 @@ public class CloudClientConnectorTest
         ddm.startManager();
 
         try {
-            Thread.sleep(10000L); // shortened for test
+            Thread.sleep(5000L); // Wait for cloud connection
         } catch (Exception e) {
             // ignore
         }
 
         ddm.stopManager();
 
-        _Logger.info("Test complete.");
+        _Logger.info("Integrated connect/disconnect test complete.");
     }
 
+    /**
+     * Tests cloud publish, subscribe, and upstream forwarding.
+     */
     @Test
     public void testPublishAndSubscribe()
     {
         this.cloudClient.setDataMessageListener(new DefaultDataMessageListener());
 
-        assertTrue(this.cloudClient.connectClient());
+        assertTrue("Cloud client failed to connect",
+            this.cloudClient.connectClient());
 
         try {
-            Thread.sleep(2000L); // wait for connection
+            Thread.sleep(2000L); // Allow MQTT handshake
         } catch (Exception e) {
             // ignore
         }
 
+        // -----------------------------
+        // Create test Sensor data
+        // -----------------------------
         SensorData sensorData = new SensorData();
         sensorData.setName(ConfigConst.TEMP_SENSOR_NAME);
         sensorData.setValue(92.0f);
 
+        // -----------------------------
+        // Create test SystemPerf data
+        // -----------------------------
         SystemPerformanceData sysPerfData = new SystemPerformanceData();
         sysPerfData.setCpuUtilization(34.7f);
         sysPerfData.setMemoryUtilization(39.8f);
 
-        // Use updated ResourceNameEnum values
-        assertTrue(this.cloudClient.subscribeToCloudEvents(ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE));
-        assertTrue(this.cloudClient.sendEdgeDataToCloud(ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, sensorData));
-        assertTrue(this.cloudClient.sendEdgeDataToCloud(ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE, sysPerfData));
+        // -----------------------------
+        // SUBSCRIBE (actuator commands)
+        // -----------------------------
+        assertTrue("Subscribe failed",
+            this.cloudClient.subscribeToCloudEvents(
+                ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE));
+
+        // -----------------------------
+        // PUBLISH test data upstream
+        // -----------------------------
+        assertTrue("Sensor publish failed",
+            this.cloudClient.sendEdgeDataToCloud(
+                ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, sensorData));
+
+        assertTrue("SystemPerf publish failed",
+            this.cloudClient.sendEdgeDataToCloud(
+                ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE, sysPerfData));
 
         try {
-            Thread.sleep(5000L); // allow data processing
+            Thread.sleep(5000L); // Allow data round-trip + logging
         } catch (Exception e) {
             // ignore
         }
 
-        assertTrue(this.cloudClient.unsubscribeFromCloudEvents(ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE));
-        assertTrue(this.cloudClient.disconnectClient());
+        // -----------------------------
+        // UNSUBSCRIBE + disconnect
+        // -----------------------------
+        assertTrue("Unsubscribe failed",
+            this.cloudClient.unsubscribeFromCloudEvents(
+                ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE));
+
+        assertTrue("Disconnect failed",
+            this.cloudClient.disconnectClient());
+
+        _Logger.info("Publish/Subscribe test complete.");
     }
 }

@@ -45,7 +45,11 @@ public class GatewayDeviceApp
             if (this.dataMgr != null) {
                 this.dataMgr.stopManager();
             }
-            _Logger.log(Level.INFO, "GDA stopped successfully with exit code {0}.", code);
+            _Logger.log(
+                Level.INFO,
+                "GDA stopped successfully with exit code {0}.",
+                code
+            );
         } catch (Exception e) {
             _Logger.log(Level.SEVERE, "Failed to cleanly stop GDA. Exiting.", e);
         }
@@ -72,8 +76,10 @@ public class GatewayDeviceApp
 
     private void initConfig(String fileName)
     {
-        _Logger.info("Attempting to load configuration: " +
-            (fileName == null ? "Default." : fileName));
+        _Logger.info(
+            "Attempting to load configuration: " +
+            (fileName == null ? "Default." : fileName)
+        );
     }
 
     private void parseArgs(String[] args)
@@ -82,16 +88,20 @@ public class GatewayDeviceApp
         initConfig(null);
     }
 
+    /**
+     * Main entry point.
+     * Keeps the JVM alive so scheduled publishers can run.
+     */
     public static void main(String[] args)
     {
         GatewayDeviceApp gwApp = new GatewayDeviceApp(args);
-
         gwApp.startApp();
 
+        // Keep application running indefinitely (Ctrl+C to exit)
         try {
-            Thread.sleep(65000L); 
-        } catch (InterruptedException e) { }
-
-        gwApp.stopApp(0);
+            Thread.currentThread().join();
+        } catch (InterruptedException e) {
+            // Allow graceful shutdown
+        }
     }
 }

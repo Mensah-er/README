@@ -51,6 +51,8 @@ public class ConfigConst
 	public static final String CONSTRAINED  = "Constrained";
 	public static final String DEVICE       = "Device";
 	public static final String SERVICE      = "Service";
+	public static final String DEVICE_LOCATION_ID = "deviceLocationID";
+
 
 	public static final String CONSTRAINED_DEVICE = CONSTRAINED + DEVICE;
 	public static final String GATEWAY_DEVICE     = GATEWAY + DEVICE;
@@ -192,6 +194,14 @@ public class ConfigConst
 	public static final String OPCUA   = "Opcua";
 	public static final String SMTP    = "Smtp";
 	public static final String DATA    = "Data";
+	
+	// --- Humidity Threshold Keys for GDA (PIOT-GDA-10-003) ---
+	public static final String HANDLE_HUMIDITY_CHANGE_ON_DEVICE = "handleHumidityChangeOnDevice";
+	public static final String HUMIDITY_MAX_TIME_PAST_THRESHOLD = "humidityMaxTimePastThreshold";
+	public static final String NOMINAL_HUMIDITY_SETTING         = "nominalHumiditySetting";
+	public static final String TRIGGER_HUMIDIFIER_FLOOR         = "triggerHumidifierFloor";
+	public static final String TRIGGER_HUMIDIFIER_CEILING       = "triggerHumidifierCeiling";
+
 	
 	public static final String DEVICE_LOCATION_ID_KEY        = "deviceLocationID";
 	
